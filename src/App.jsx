@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Camera, Send, LogOut, Home, Wallet, ShoppingBag, User, 
+  LogOut, Wallet, ShoppingBag, User, 
   AlertCircle, CheckCircle, Clock, Key, Download, ArrowRight, 
   Phone, MessageSquare, Video, Smartphone, ShieldCheck, PlusCircle 
 } from 'lucide-react';
-
 const API_URL = 'https://society-backend-dpj5.onrender.com/api';
 
 // ==========================================
