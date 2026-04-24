@@ -494,7 +494,7 @@ export default function SOCIETYxSHOP() {
             ครบวงจร <span className="text-yellow-500">ราคาจับต้องได้</span>
           </h2>
           <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
-            โปรแกรมคุณภาพสำหรับเกม PUBG และบริการเกมยอดนิยม<br className="hidden md:block"/>
+            โปรแกรมคุณภาพสำหรับเกม PUBG FIVEM และบริการเกมยอดนิยม<br className="hidden md:block"/>
             ซื้อง่าย ได้ไว ส่งอัตโนมัติผ่านเว็บไซต์ตลอด 24 ชั่วโมง
           </p>
 
@@ -521,7 +521,7 @@ export default function SOCIETYxSHOP() {
 
           <div className="grid grid-cols-3 gap-4 md:gap-12 border-t border-white/10 pt-10 max-w-2xl mx-auto">
             <div className="text-center">
-              <h3 className="text-2xl md:text-4xl font-black text-white eng-num mb-1">600</h3>
+              <h3 className="text-2xl md:text-4xl font-black text-white eng-num mb-1">600+</h3>
               <p className="text-xs md:text-sm text-gray-500 font-bold">ผู้ใช้งาน</p>
             </div>
             <div className="text-center border-l border-r border-white/5">
