@@ -1067,19 +1067,25 @@ export default function SOCIETYxSHOP() {
                 </div>
               ) : orders.map((order, idx) => {
                 const pName = order.productName.toUpperCase(); 
-                let productType = 'admin_install'; 
+               let productType = 'admin_install'; 
                 
+                // ⚡ 1. อัปเกรดระบบจัดหมวดหมู่ (ดึงลิงก์จากหลังบ้านมาเช็คด้วย)
                 if (pName.includes('CMD')) { 
                   productType = 'key_and_download'; 
-                } else if (pName.includes('EXTERNAL') || pName.includes('RESHADE')) { 
+                } else if (pName.includes('EXTERNAL') || pName.includes('RESHADE') || pName.includes('SYSTEM TUNING') || order.downloadUrl) { 
+                  // เพิ่ม SYSTEM TUNING และรองรับลิงก์ออโต้จากหลังบ้าน
                   productType = 'download_only'; 
                 }
                 
-                let dLink = "#"; 
-                if (pName.includes('EXTERNAL')) dLink = STORE_LINKS.external; 
-                else if (pName.includes('RESHADE')) dLink = STORE_LINKS.reshade; 
-                else if (pName.includes('CMD')) dLink = STORE_LINKS.cmd;
-                
+                // ⚡ 2. ระบบดึงลิงก์อัจฉริยะ
+                let dLink = order.downloadUrl || "#"; 
+                if (dLink === "#") {
+                  if (pName.includes('EXTERNAL')) dLink = STORE_LINKS.external; 
+                  else if (pName.includes('RESHADE')) dLink = STORE_LINKS.reshade; 
+                  else if (pName.includes('CMD')) dLink = STORE_LINKS.cmd;
+                  else if (pName.includes('SYSTEM TUNING')) dLink = "https://www.mediafire.com/file/g6caw7kn5j4fy4f/OPTIMIZATION_-_THE_ULTIMATE_CONFIG.bat/file";
+                }
+
                 return (
                   <div key={idx} className="glass-panel rounded-2xl p-6 flex flex-col gap-5 border-white/5">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
