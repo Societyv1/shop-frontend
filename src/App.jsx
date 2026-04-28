@@ -162,7 +162,7 @@ export default function SOCIETYxSHOP() {
     tiktok: "https://www.tiktok.com/@societyxshopv1?is_from_webapp=1&sender_device=pc",
     youtube: "https://www.youtube.com/channel/UCr60L8rgOnVKaGTil_NPMgw",
     external: "https://www.mediafire.com/file/tjhm8q83phd98yg/SOCIETYWEB.rar/file",
-    reshade: "https://www.mediafire.com/file/thmir3bn1bo1wk0/รีเชรด+Society.rar/file",
+    reshade: "https://www.mediafire.com/file/rnj6giipr99ji6y/%25E0%25B8%25A3%25E0%25B8%25B5%25E0%25B9%2580%25E0%25B8%258A%25E0%25B8%25A3%25E0%25B8%2594_Society.rar/file",
     cmd: "https://www.mediafire.com/file/tf8mshzaz0j6a9m/CMD+society.rar/file",
     systempf: "https://www.mediafire.com/file/g6caw7kn5j4fy4f/OPTIMIZATION_-_THE_ULTIMATE_CONFIG.bat/file"
   };
