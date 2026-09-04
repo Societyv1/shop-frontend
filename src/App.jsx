@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   LogOut, Wallet, ShoppingBag, User, 
   AlertCircle, CheckCircle, Clock, Key, Download, ArrowRight, 
-  Phone, MessageSquare, Video, Smartphone, ShieldCheck, PlusCircle 
+  Phone, MessageSquare, Video, Smartphone, ShieldCheck, PlusCircle,
+  Search, Plus, Minus
 } from 'lucide-react';
 import { io } from 'socket.io-client'; 
 
@@ -148,6 +149,8 @@ export default function SOCIETYxSHOP() {
   const [recentPurchase, setRecentPurchase] = useState(null);
 
   const [adminStats, setAdminStats] = useState(null);
+  const [adminUsers, setAdminUsers] = useState([]); 
+  const [userSearch, setUserSearch] = useState("");
   const [bulkKeys, setBulkKeys] = useState("");
   const [selectedAdminProduct, setSelectedAdminProduct] = useState("CMD SOCIETY");
 
@@ -265,15 +268,41 @@ export default function SOCIETYxSHOP() {
     } catch (err) {}
   };
 
-  // ดึงข้อมูลแอดมิน
+  // 🟢 ดึงสถิติ + รายชื่อลูกค้า
   const loadAdminData = async () => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`${API_URL}/admin/stats`, { 
-        headers: { 'Authorization': `Bearer ${token}` } 
-      });
-      if (res.ok) setAdminStats(await res.json());
+      const resStats = await fetch(`${API_URL}/admin/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (resStats.ok) setAdminStats(await resStats.json());
+
+      const resUsers = await fetch(`${API_URL}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (resUsers.ok) setAdminUsers(await resUsers.json());
     } catch (err) {}
+  };
+
+  // 🟢 ฟังก์ชันสำหรับ แอดมินปรับเพิ่ม/ลด เงิน
+  const handleUpdateBalance = async (userId, username, tag, currentBalance, action) => {
+    const actionText = action === 'add' ? 'เพิ่มเงินให้' : 'หักเงินจาก';
+    const amount = prompt(`ต้องการ ${actionText} ${username}#${tag}\nยอดปัจจุบัน: ฿${currentBalance}\n\nระบุจำนวนเงินที่ต้องการ (บาท):`);
+    
+    if (!amount || isNaN(amount) || amount <= 0) return;
+    
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/admin/users/balance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ userId, amount, action })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification(data.message, 'success');
+        loadAdminData(); // โหลดตารางใหม่ให้ยอดเงินอัปเดตทันที
+      } else {
+        showNotification(data.message, 'error');
+      }
+    } catch (err) { showNotification('เกิดข้อผิดพลาดในการปรับยอดเงิน', 'error'); }
+    setLoading(false);
   };
 
   const handleBuy = (product) => {
@@ -447,6 +476,12 @@ export default function SOCIETYxSHOP() {
     : products.filter(p => p.category === selectedCategory);
   
   const categories = ['ทั้งหมด', ...new Set(products.map(p => p.category))];
+
+  // 🟢 โค้ดสำหรับค้นหารายชื่อลูกค้าในหน้า Admin
+  const filteredAdminUsers = adminUsers.filter(u => 
+    `${u.username}#${u.tag}`.toLowerCase().includes(userSearch.toLowerCase()) || 
+    u.email.toLowerCase().includes(userSearch.toLowerCase())
+  );
 
   // CSS แกนหลัก
   const globalStyles = `
@@ -1214,7 +1249,10 @@ export default function SOCIETYxSHOP() {
                     {user.username.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white mb-1">{user.username}</h3>
+                    <h3 className="text-2xl font-bold text-white mb-1">
+   {user.username}
+   {user.tag && <span className="text-gray-500 text-lg ml-1">#{user.tag}</span>}
+</h3>
                     <span className="bg-white/10 text-gray-300 text-xs px-3 py-1 rounded-full border border-white/10">สมาชิกระบบ</span>
                   </div>
                 </div>
@@ -1296,12 +1334,80 @@ export default function SOCIETYxSHOP() {
                 <p className="text-gray-400 text-sm">ยอดขายรวม</p>
                 <p className="text-2xl font-black text-yellow-500 eng-num">฿{adminStats?.totalSales || 0}</p>
               </div>
+              
               <div className="glass-panel p-6 rounded-2xl border-white/5">
                 <p className="text-gray-400 text-sm">สมาชิกทั้งหมด</p>
                 <p className="text-2xl font-black text-white eng-num">{adminStats?.usersCount || 0} คน</p>
               </div>
             </div>
+{/* 🟢 เริ่ม: ตารางจัดการผู้ใช้งาน (User Management) */}
+            <div className="glass-panel p-8 rounded-3xl border-white/5 mt-8">
+              <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+                <h3 className="text-xl font-bold flex items-center gap-2"><User size={20}/> จัดการผู้ใช้งาน & เติมเงิน</h3>
+                
+                {/* ช่องค้นหา */}
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    placeholder="ค้นหาชื่อ หรือ Tag..." 
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    className="pl-10 pr-4 py-2 bg-black/50 border border-white/10 rounded-xl text-white outline-none focus:border-yellow-500 w-full md:w-64"
+                  />
+                  <Search size={18} className="absolute left-3 top-2.5 text-gray-500" />
+                </div>
+              </div>
 
+              {/* ตารางแสดงรายชื่อ */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-white/10 text-gray-400 text-sm">
+                      <th className="pb-3 px-2 font-medium">ชื่อผู้ใช้งาน (Tag)</th>
+                      <th className="pb-3 px-2 font-medium">อีเมล</th>
+                      <th className="pb-3 px-2 font-medium text-right">ยอดเงินปัจจุบัน</th>
+                      <th className="pb-3 px-2 font-medium text-center">จัดการยอดเงิน</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAdminUsers.map((u) => (
+                      <tr key={u._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="py-4 px-2 font-bold text-white">
+                          {u.username} <span className="text-gray-500 font-normal">#{u.tag || '0000'}</span>
+                          {u.isAdmin && <span className="ml-2 text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full">Admin</span>}
+                        </td>
+                        <td className="py-4 px-2 text-gray-400 text-sm">{u.email}</td>
+                        <td className="py-4 px-2 text-right text-yellow-400 font-bold eng-num">฿{u.balance.toFixed(2)}</td>
+                        <td className="py-4 px-2">
+                          <div className="flex items-center justify-center gap-2">
+                            {/* ปุ่ม หักเงิน */}
+                            <button 
+                              onClick={() => handleUpdateBalance(u._id, u.username, u.tag || '0000', u.balance, 'subtract')}
+                              className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg transition-colors border border-red-500/20"
+                              title="หักเงิน"
+                            >
+                              <Minus size={16} />
+                            </button>
+                            {/* ปุ่ม เพิ่มเงิน */}
+                            <button 
+                              onClick={() => handleUpdateBalance(u._id, u.username, u.tag || '0000', u.balance, 'add')}
+                              className="bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white p-2 rounded-lg transition-colors border border-green-500/20"
+                              title="เพิ่มเงิน"
+                            >
+                              <Plus size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredAdminUsers.length === 0 && (
+                      <tr><td colSpan="4" className="text-center py-8 text-gray-500">ไม่พบรายชื่อผู้ใช้งานนี้</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            {/* 🟢 จบ: ตารางจัดการผู้ใช้งาน */}
             <div className="glass-panel p-8 rounded-3xl border-white/5">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><PlusCircle size={20}/> เติมคีย์สินค้า (Bulk Add)</h3>
               <div className="space-y-4">
