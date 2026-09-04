@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   LogOut, Wallet, ShoppingBag, User, 
   AlertCircle, CheckCircle, Clock, Key, Download, ArrowRight, 
