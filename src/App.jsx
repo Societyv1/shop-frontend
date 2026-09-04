@@ -372,6 +372,35 @@ const handleAcceptTerms = () => {
     }
   };
 
+const [promoCodeInput, setPromoCodeInput] = useState('');
+
+  const handleRedeemPromoCode = async () => {
+    if (!promoCodeInput.trim()) return showNotification('⚠ กรุณากรอกโค้ดส่วนลดก่อน', 'warning');
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/refill/redeem-code`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ code: promoCodeInput })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setUser({ ...user, balance: data.newBalance });
+        showNotification(`✓ ${data.message}`, 'success');
+        setPromoCodeInput('');
+      } else {
+        showNotification(data.message || 'ใช้โค้ดไม่สำเร็จ', 'error');
+      }
+    } catch (err) {
+      showNotification('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+    }
+    setLoading(false);
+  };
+
   const submitSlip = async () => {
     if (!slipImage) return showNotification('⚠ กรุณาเลือกรูปสลิปก่อน', 'warning');
     
@@ -1122,6 +1151,31 @@ const handleAcceptTerms = () => {
                   </div>
                 </div>
               )}
+            </div>
+            
+            {/* 🎟️ กล่องกรอกโค้ดเติมเงินรับโบนัส */}
+            <div className="glass-panel border border-yellow-500/20 rounded-2xl p-6 mt-8">
+              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <span className="text-yellow-500">🎁</span> แลกรับโค้ดส่วนลด / โบนัสเติมเงิน
+              </h3>
+              <p className="text-gray-400 text-sm mb-4">มีโค้ดโปรโมชันจากทางร้าน สามารถกรอกเพื่อรับเครดิตเงินเพิ่มเข้าบัญชีได้ทันที</p>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input 
+                  type="text" 
+                  value={promoCodeInput}
+                  onChange={(e) => setPromoCodeInput(e.target.value)}
+                  placeholder="กรอกโค้ดส่วนลดที่นี่ (เช่น SOCIETY50)" 
+                  className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white uppercase font-bold tracking-wider outline-none focus:border-yellow-500 transition-all placeholder-gray-500"
+                />
+                <button 
+                  onClick={handleRedeemPromoCode}
+                  disabled={loading || !promoCodeInput}
+                  className="smooth-btn bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold px-8 py-3.5 rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.2)] disabled:opacity-50 whitespace-nowrap"
+                >
+                  {loading ? 'กำลังตรวจสอบ...' : 'use code'}
+                </button>
+              </div>
             </div>
 
             <div className="fade-in">
