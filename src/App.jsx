@@ -1,10 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { 
   LogOut, Wallet, ShoppingBag, User, 
   AlertCircle, CheckCircle, Clock, Key, Download, ArrowRight, 
   Phone, MessageSquare, Video, Smartphone, ShieldCheck, PlusCircle 
 } from 'lucide-react';
+import { io } from 'socket.io-client'; 
+
 const API_URL = 'https://society-backend-dpj5.onrender.com/api';
+const socket = io('https://society-backend-dpj5.onrender.com', {
+  transports: ['websocket', 'polling']
+});
+
+socket.on('connect', () => {
+  console.log('🟢 Socket.IO Connected:', socket.id);
+});
+
+socket.on('connect_error', (err) => {
+  console.error('🔴 Socket.IO Connection Error:', err.message);
+});
 
 // ==========================================
 // ระบบพื้นหลัง Particles สไตล์ Hacker/Premium
@@ -132,6 +144,7 @@ export default function SOCIETYxSHOP() {
   const [showBuyModal, setShowBuyModal] = useState(null); 
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [recentPurchase, setRecentPurchase] = useState(null);
 
   const [adminStats, setAdminStats] = useState(null);
   const [bulkKeys, setBulkKeys] = useState("");
@@ -168,9 +181,39 @@ export default function SOCIETYxSHOP() {
   };
 
   useEffect(() => {
-    loadProducts();
-    checkAuth();
-  }, []);
+      loadProducts();
+      checkAuth();
+  
+      // 🟢 ระบบดักฟัง Real-time เมื่อมีคำสั่งซื้อสำเร็จจากหลังบ้าน
+      socket.on('productSold', (data) => {
+  console.log('🔥 ได้รับ productSold:', data);
+
+  setProducts((prevProducts) =>
+    prevProducts.map((product) =>
+      product._id === data.productId
+        ? { ...product, soldCount: data.newSoldCount }
+        : product
+    )
+  );
+
+  setRecentPurchase(data);
+});
+  
+      // 🟢 ล้างการเชื่อมต่อเมื่อผู้ใช้ปิดหน้าเว็บ (ต้องอยู่ "ข้างใน" useEffect บล็อกแรก)
+      return () => {
+        socket.off('productSold');
+      };
+    }, []); // <-- ปิดบล็อกที่ 1 ตรงนี้ครับ
+  
+    // 🟢 ตั้งเวลาปิด Pop-up Recent Purchase (บล็อกที่ 2 แยกออกมาแบบนี้ถูกต้องแล้วครับ)
+    useEffect(() => {
+      if (recentPurchase) {
+        const timer = setTimeout(() => {
+          setRecentPurchase(null);
+        }, 6000); // โชว์ค้างไว้ 6 วินาทีแล้วค่อยหายไป
+        return () => clearTimeout(timer);
+      }
+    }, [recentPurchase]); 
 
   const checkAuth = async () => {
     const token = localStorage.getItem('token');
@@ -1345,6 +1388,32 @@ export default function SOCIETYxSHOP() {
           </span>
         </div>
       )}
-    </div>
-  );
-}
+
+      {/* 🟢 ย้าย RECENT PURCHASE POPUP (มุมซ้ายล่าง) มาวางตรงนี้ครับ 🟢 */}
+      {recentPurchase && (
+        <div className="fixed bottom-6 left-6 z-[110] flex items-center gap-4 p-3 pr-6 rounded-2xl glass-panel border border-yellow-500/30 shadow-[0_0_20px_rgba(212,175,55,0.15)] fade-in max-w-sm">
+          {/* รูปสินค้า */}
+          {recentPurchase.productImage ? (
+            <img src={recentPurchase.productImage} alt="product" className="w-16 h-16 object-cover rounded-xl border border-white/10" />
+          ) : (
+            <div className="w-16 h-16 bg-black/40 rounded-xl flex items-center justify-center border border-white/10">
+              <ShoppingBag className="text-yellow-500" size={24} />
+            </div>
+          )}
+          
+          {/* ข้อความ */}
+          <div className="flex flex-col">
+            <span className="text-[10px] bg-green-500 text-black font-black px-2 py-0.5 rounded-md w-fit mb-1 animate-pulse">
+              การสั่งซื้อล่าสุด
+            </span>
+            <p className="text-xs text-gray-400">ผู้ใช้: {recentPurchase.buyerName}</p>
+            <p className="text-sm font-bold text-yellow-400 line-clamp-1">{recentPurchase.productName}</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">{recentPurchase.time}</p>
+          </div>
+        </div>
+      )}
+
+    </div> 
+  ); 
+} 
+
