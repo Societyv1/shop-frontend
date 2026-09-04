@@ -140,6 +140,16 @@ const ParticlesBackground = () => {
 // ระบบหลัก (Main App)
 // ==========================================
 export default function SOCIETYxSHOP() {
+const [showTermsModal, setShowTermsModal] = useState(false);
+
+  useEffect(() => {
+    // เช็กว่าผู้ใช้เคยยอมรับเงื่อนไขในเครื่องนี้หรือยัง
+    const acceptedTerms = localStorage.getItem('accepted_terms');
+    if (!acceptedTerms) {
+      setShowTermsModal(true);
+    }
+  }, []);
+
   const [currentPage, setCurrentPage] = useState('landing'); 
   const [user, setUser] = useState(null);
   const [isGuest, setIsGuest] = useState(false); 
@@ -237,7 +247,11 @@ export default function SOCIETYxSHOP() {
       }
     }
   };
-
+const handleAcceptTerms = () => {
+    localStorage.setItem('accepted_terms', 'true');
+    setShowTermsModal(false);
+    showNotification('✓ ยอมรับเงื่อนไขการให้บริการเรียบร้อยแล้ว', 'success');
+  };
   const loadProducts = async () => {
     try {
       const res = await fetch(`${API_URL}/products`);
@@ -1519,7 +1533,67 @@ export default function SOCIETYxSHOP() {
           </div>
         </div>
       )}
+        {/* 📜 TERMS OF SERVICE MODAL */}
+      {showTermsModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 fade-in">
+          <div className="glass-panel border border-yellow-500/40 rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-[0_0_50px_rgba(212,175,55,0.2)] flex flex-col max-h-[90vh]">
+            
+            {/* หัวข้อ */}
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-black text-white mb-1">ข้อกำหนดและเงื่อนไขการให้บริการ</h3>
+              <p className="text-yellow-500 text-xs tracking-widest font-poppins uppercase">SOCIETY×SHOP - TERMS OF SERVICE</p>
+              <div className="w-16 h-1 bg-yellow-500 rounded-full mx-auto mt-3"></div>
+            </div>
 
+            {/* เนื้อหากฎ (ภาษาทางการ อ่านง่าย สบายตา) */}
+            <div className="overflow-y-auto space-y-4 pr-2 text-gray-300 text-sm leading-relaxed mb-6 custom-scrollbar bg-black/40 p-5 rounded-2xl border border-white/5">
+              <div>
+                <h4 className="text-white font-bold mb-1 flex items-center gap-2">⚠️ 1. นโยบายการห้ามจำหน่ายต่อ (No Resell)</h4>
+                <p className="text-gray-400 text-xs">ห้ามมิให้นำผลิตภัณฑ์หรือบริการฟรีภายในร้านไปจำหน่ายต่อในทุกกรณี หากตรวจพบการละเมิด ทางร้านจะดำเนินการระงับบัญชีถาวรทันที</p>
+              </div>
+
+              <div>
+                <h4 className="text-white font-bold mb-1 flex items-center gap-2">🛡️ 2. การยอมรับความเสี่ยง (Accept Risk)</h4>
+                <p className="text-gray-400 text-xs">ผลิตภัณฑ์และซอฟต์แวร์ทั้งหมดภายในร้าน (ทั้งประเภทไม่มีค่าใช้จ่ายและมีค่าใช้จ่าย) อาจมีความเสี่ยงที่เกี่ยวข้องกับการใช้งาน ผู้ใช้ต้องยอมรับความเสี่ยงด้วยตนเองก่อนตัดสินใจใช้งาน</p>
+              </div>
+
+              <div>
+                <h4 className="text-white font-bold mb-1 flex items-center gap-2">⚖️ 3. การปฏิเสธความรับผิดชอบกรณีถูกแบน (No Responsibility)</h4>
+                <p className="text-gray-400 text-xs">ทางร้านจะไม่รับผิดชอบต่อความเสียหายใดๆ ทั้งสิ้น หากบัญชีเกมของท่านถูกระงับหรือถูกแบนจากการใช้งานทุกกรณี</p>
+              </div>
+
+              <div>
+                <h4 className="text-white font-bold mb-1 flex items-center gap-2">🚫 4. กฎระเบียบภายในชุมชน (No Drama & Spam)</h4>
+                <p className="text-gray-400 text-xs">ห้ามก่อความวุ่นวาย สร้างความเดือดร้อน สแปมข้อความ หรือแท็กผู้ดูแลระบบโดยไม่จำเป็นภายในช่องทาง Discord ของร้าน</p>
+              </div>
+
+              <div>
+                <h4 className="text-white font-bold mb-1 flex items-center gap-2">🤝 5. มาตรการป้องกันการฉ้อโกง (Scam Protection)</h4>
+                <p className="text-gray-400 text-xs">การทำธุรกรรมซื้อขายใดๆ ที่ไม่ผ่านระบบคนกลาง (Middleman) ของทางร้าน ทางร้านจะไม่รับผิดชอบต่อความเสียหายหากเกิดกรณีถูกฉ้อโกง</p>
+              </div>
+
+              <div>
+                <h4 className="text-white font-bold mb-1 flex items-center gap-2">🔄 6. เงื่อนไขการรีเซ็ตคีย์ (Reset Key & Support)</h4>
+                <p className="text-gray-400 text-xs">หากมีความประสงค์ต้องการรีเซ็ตคีย์ กรุณาเปิด Ticket ผ่านช่องทาง Discord เท่านั้น (อาจมีค่าธรรมเนียมตามประเภทของสินค้า)</p>
+              </div>
+
+              <div>
+                <h4 className="text-white font-bold mb-1 flex items-center gap-2">🕒 7. เวลาทำการและแหล่งที่มาของบริการ (Service Time & Provider)</h4>
+                <p className="text-gray-400 text-xs">ร้านเปิดให้บริการเวลา 07:00 น. - 21:00 น. สินค้าบางรายการเป็นบริการที่เราจัดหาจากผู้ให้บริการภายนอก ซึ่งบางกรณีอาจไม่สามารถแก้ไขโค้ดต้นฉบับได้โดยตรง</p>
+              </div>
+            </div>
+
+            {/* ปุ่มยอมรับ */}
+            <button 
+              onClick={handleAcceptTerms}
+              className="smooth-btn w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold text-base rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:brightness-110"
+            >
+              ข้าพเจ้าได้อ่านและยอมรับเงื่อนไขการให้บริการทั้งหมด
+            </button>
+
+          </div>
+        </div>
+      )}
     </div> 
   ); 
 } 
