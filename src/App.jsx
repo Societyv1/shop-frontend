@@ -1636,7 +1636,7 @@ export default function SOCIETYxSHOP() {
                       </div>
                       <button 
                         onClick={async () => {
-                          if (!confirm('ต้องการลบประกาศนี้ใช่หรือไม่?')) return;
+                          if (!window.confirm('ต้องการลบประกาศนี้ใช่หรือไม่?')) return;
                           try {
                             const res = await fetch(`${API_URL}/admin/announcements/${item._id}`, {
                               method: 'DELETE',
