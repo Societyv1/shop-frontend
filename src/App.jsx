@@ -1152,7 +1152,7 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 </div>
               )}
             </div>
-            
+
             {/* 🎟️ กล่องกรอกโค้ดเติมเงินรับโบนัส */}
             <div className="glass-panel border border-yellow-500/20 rounded-2xl p-6 mt-8">
               <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
@@ -1549,7 +1549,62 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                   <Search size={18} className="absolute left-3 top-2.5 text-gray-500" />
                 </div>
               </div>
+              {/* 🎟️ กล่องสร้างโค้ดส่วนลดสำหรับแอดมิน */}
+<div className="glass-panel p-8 rounded-3xl border-white/5 mt-8">
+  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">🎁 สร้างโค้ดเติมเงิน (Promo Code)</h3>
+  <form onSubmit={async (e) => {
+    e.preventDefault();
+    const code = e.target.promoCode.value;
+    const bonus = e.target.bonusAmount.value;
+    const uses = e.target.maxUses.value;
 
+    try {
+      const res = await fetch(`${API_URL}/admin/promo-codes`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify({ code, bonusAmount: bonus, maxUses: uses })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification(`✓ ${data.message}`, 'success');
+        e.target.reset();
+      } else {
+        showNotification(data.message || 'สร้างโค้ดไม่สำเร็จ', 'error');
+      }
+    } catch (err) {
+      showNotification('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+    }
+  }} className="space-y-4">
+    <input 
+      type="text" 
+      name="promoCode" 
+      placeholder="ชื่อโค้ด (เช่น FREE50)" 
+      className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white uppercase outline-none focus:border-yellow-500" 
+      required 
+    />
+    <input 
+      type="number" 
+      name="bonusAmount" 
+      placeholder="จำนวนเงินโบนัสที่จะได้รับ (บาท)" 
+      className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:border-yellow-500" 
+      required 
+    />
+    <input 
+      type="number" 
+      name="maxUses" 
+      placeholder="จำนวนครั้งที่ใช้ได้ (เช่น 50 ครั้ง)" 
+      className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:border-yellow-500" 
+      defaultValue="100" 
+      required 
+    />
+    <button type="submit" className="w-full py-4 bg-yellow-500 text-black font-black rounded-xl hover:bg-yellow-400 transition-all shadow-lg">
+      ยืนยันการสร้างโค้ด
+    </button>
+  </form>
+</div>
               {/* ตารางแสดงรายชื่อ */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -1599,6 +1654,7 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 </table>
               </div>
             </div>
+            
             {/* 🟢 จบ: ตารางจัดการผู้ใช้งาน */}
             <div className="glass-panel p-8 rounded-3xl border-white/5">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><PlusCircle size={20}/> เติมคีย์สินค้า (Bulk Add)</h3>
