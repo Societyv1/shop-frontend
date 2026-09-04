@@ -915,6 +915,9 @@ const handleAcceptTerms = () => {
             <button onClick={() => setCurrentPage('contact')} className={`nav-btn ${currentPage === 'contact' ? 'active' : ''}`}>
               <Phone size={18} className="inline mr-2 mb-1" /> ติดต่อเรา
             </button>
+            <button onClick={() => setCurrentPage('reviews')} className={`nav-btn ${currentPage === 'reviews' ? 'active' : ''}`}>
+  ⭐ รีวิวจากลูกค้า
+</button>
           </div>
         </div>
       </header>
@@ -1334,6 +1337,127 @@ const handleAcceptTerms = () => {
                   </form>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+{/* ⭐ CUSTOMER REVIEWS PAGE (หน้ารีวิวจากลูกค้า) */}
+        {currentPage === 'reviews' && (
+          <div className="fade-in space-y-8 pb-12">
+            <div className="text-center max-w-2xl mx-auto mb-10">
+              <h2 className="text-3xl md:text-4xl font-black mb-3">ความประทับใจจาก <span className="text-yellow-500">ลูกค้าจริง</span></h2>
+              <p className="text-gray-400 text-sm md:text-base">เสียงยืนยันความนิ่ง ความคุ้มค่า และบริการหลังการขายจากผู้ใช้งานจริงใน Discord</p>
+              <div className="w-20 h-1 bg-yellow-500 rounded-full mx-auto mt-4"></div>
+            </div>
+
+            {/* Grid รีวิวสินค้าและบริการ */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              
+              {/* รีวิวที่ 1 */}
+              <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-bold text-white">Panama2</span>
+                    <span className="text-yellow-400 text-xs bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/20">⭐⭐⭐⭐⭐</span>
+                  </div>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-6">"เจ้านี้ดีสุด มาโครนิ่งมาก ดีกว่าอีกเจ้าที่ V5 อะ"</p>
+                </div>
+                <div className="border-t border-white/5 pt-3 text-[11px] text-gray-500 flex justify-between">
+                  <span>รีวิวจาก Discord</span>
+                  <span>11/8/2569</span>
+                </div>
+              </div>
+
+              {/* รีวิวที่ 2 */}
+              <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-bold text-white">Itameow [RLG]</span>
+                    <span className="text-yellow-400 text-xs bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/20">⭐⭐⭐⭐⭐</span>
+                  </div>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-6">"นึ่งจัดอย่างกะโปร5555"</p>
+                </div>
+                <div className="border-t border-white/5 pt-3 text-[11px] text-gray-500 flex justify-between">
+                  <span>รีวิวจาก Discord</span>
+                  <span>9/9/2569</span>
+                </div>
+              </div>
+
+              {/* รีวิวที่ 3 */}
+              <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-bold text-white">รักในดิส คิดได้ไง.</span>
+                    <span className="text-yellow-400 text-xs bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/20">⭐⭐⭐⭐⭐</span>
+                  </div>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-6">"ใช้ง่าย คลิปสอนครบ มาโครนิ่งกริ๊บบ"</p>
+                </div>
+                <div className="border-t border-white/5 pt-3 text-[11px] text-gray-500 flex justify-between">
+                  <span>รีวิวจาก Discord</span>
+                  <span>10/8/2569</span>
+                </div>
+              </div>
+
+              {/* รีวิวที่ 4 */}
+              <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-bold text-white">Thug</span>
+                    <span className="text-yellow-400 text-xs bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/20">⭐⭐⭐⭐⭐</span>
+                  </div>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-6">"ซื้อตัว200มาคุ้มมากครับ"</p>
+                </div>
+                <div className="border-t border-white/5 pt-3 text-[11px] text-gray-500 flex justify-between">
+                  <span>รีวิวจาก Discord</span>
+                  <span>30/3/2569</span>
+                </div>
+              </div>
+
+              {/* รีวิวที่ 5 */}
+              <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-bold text-white">YIMWAN</span>
+                    <span className="text-yellow-400 text-xs bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/20">⭐⭐⭐⭐⭐</span>
+                  </div>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-6">"ครับแอดใจดีคุยง่ายและของดีมากครับ"</p>
+                </div>
+                <div className="border-t border-white/5 pt-3 text-[11px] text-gray-500 flex justify-between">
+                  <span>รีวิวจาก Discord</span>
+                  <span>29/5/2569</span>
+                </div>
+              </div>
+
+              {/* รีวิวที่ 6 */}
+              <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-bold text-white">Gino Matilda</span>
+                    <span className="text-yellow-400 text-xs bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/20">⭐⭐⭐⭐⭐</span>
+                  </div>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-6">"คุมเม้าส์นิ่งมาก บริการดีมากๆครับ"</p>
+                </div>
+                <div className="border-t border-white/5 pt-3 text-[11px] text-gray-500 flex justify-between">
+                  <span>รีวิวจาก Discord</span>
+                  <span>28/8/2569</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* กล่องเชิญชวนเข้า Discord ไปดูรีวิวเพิ่ม */}
+            <div className="glass-panel p-8 rounded-3xl border-yellow-500/20 text-center max-w-xl mx-auto mt-12 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-2xl"></div>
+              <h3 className="text-xl font-bold text-white mb-2">อยากดูรีวิวเพิ่มเติมหรือพูดคุยกับเพื่อนๆ?</h3>
+              <p className="text-gray-400 text-sm mb-6">สามารถเข้าไปดูฟีดแบ็กสดๆ และพูดคุยในคอมมูนิตี้ของเราได้ที่ Discord เลยครับ</p>
+              <a 
+                href={STORE_LINKS.discord} 
+                target="_blank" 
+                rel="noreferrer" 
+                className="smooth-btn inline-flex items-center gap-2 bg-[#5865F2] hover:bg-[#4752C4] text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg"
+              >
+                💬 เข้าร่วม Discord ของเรา
+              </a>
             </div>
           </div>
         )}
