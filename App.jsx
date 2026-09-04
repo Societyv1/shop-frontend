@@ -6,7 +6,17 @@ import {
 import { io } from 'socket.io-client'; 
 
 const API_URL = 'https://society-backend-dpj5.onrender.com/api';
-const socket = io('https://society-backend-dpj5.onrender.com');
+const socket = io('https://society-backend-dpj5.onrender.com', {
+  transports: ['websocket', 'polling']
+});
+
+socket.on('connect', () => {
+  console.log('🟢 Socket.IO Connected:', socket.id);
+});
+
+socket.on('connect_error', (err) => {
+  console.error('🔴 Socket.IO Connection Error:', err.message);
+});
 
 // ==========================================
 // ระบบพื้นหลัง Particles สไตล์ Hacker/Premium
@@ -176,20 +186,18 @@ export default function SOCIETYxSHOP() {
   
       // 🟢 ระบบดักฟัง Real-time เมื่อมีคำสั่งซื้อสำเร็จจากหลังบ้าน
       socket.on('productSold', (data) => {
-        console.log("🔥 ยอดขายอัปเดต!", data);
-        
-        // อัปเดตตัวเลขขายแล้ว (โค้ดเดิมของเตอร์)
-        setProducts((prevProducts) => 
-          prevProducts.map((product) => 
-            product._id === data.productId 
-              ? { ...product, soldCount: data.newSoldCount } 
-              : product
-          )
-        );
-  
-        // 🟢 สั่งให้โชว์ Pop up มุมซ้ายล่าง
-        setRecentPurchase(data);
-      });
+  console.log('🔥 ได้รับ productSold:', data);
+
+  setProducts((prevProducts) =>
+    prevProducts.map((product) =>
+      product._id === data.productId
+        ? { ...product, soldCount: data.newSoldCount }
+        : product
+    )
+  );
+
+  setRecentPurchase(data);
+});
   
       // 🟢 ล้างการเชื่อมต่อเมื่อผู้ใช้ปิดหน้าเว็บ (ต้องอยู่ "ข้างใน" useEffect บล็อกแรก)
       return () => {
