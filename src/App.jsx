@@ -1589,9 +1589,9 @@ export default function SOCIETYxSHOP() {
                 </form>
               </div>
 
-              {/* 📢 กล่องแอดมินสร้างประกาศหน้าเว็บ */}
               <div className="glass-panel p-8 rounded-3xl border-white/5 mb-8">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">📢 สร้างประกาศหน้าเว็บ (Announcement)</h3>
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">📢 จัดการประกาศหน้าเว็บ (Announcements)</h3>
+                
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   const message = e.target.announceMessage.value;
@@ -1615,7 +1615,7 @@ export default function SOCIETYxSHOP() {
                   } catch (err) {
                     showNotification('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
                   }
-                }} className="space-y-4">
+                }} className="space-y-4 mb-6">
                   <textarea 
                     name="announceMessage" 
                     placeholder="ข้อความประกาศ เช่น แจกโค้ดส่วนลดฟรี 50 บาท รีบใช้ก่อนหมดเขต!" 
@@ -1626,6 +1626,42 @@ export default function SOCIETYxSHOP() {
                     โพสต์ประกาศหน้าเว็บ
                   </button>
                 </form>
+
+                <div className="space-y-3">
+                  {announcements.map((item) => (
+                    <div key={item._id} className="bg-black/40 border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-white font-medium text-sm">{item.message}</p>
+                        <span className="text-xs text-gray-500">{new Date(item.createdAt).toLocaleString('th-TH')}</span>
+                      </div>
+                      <button 
+                        onClick={async () => {
+                          if (!confirm('ต้องการลบประกาศนี้ใช่หรือไม่?')) return;
+                          try {
+                            const res = await fetch(`${API_URL}/admin/announcements/${item._id}`, {
+                              method: 'DELETE',
+                              headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                            });
+                            if (res.ok) {
+                              showNotification('✓ ลบประกาศสำเร็จ', 'success');
+                              loadAnnouncements();
+                            } else {
+                              showNotification('ลบประกาศไม่สำเร็จ', 'error');
+                            }
+                          } catch (err) {
+                            showNotification('เกิดข้อผิดพลาด', 'error');
+                          }
+                        }}
+                        className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors border border-red-500/20 whitespace-nowrap"
+                      >
+                        ลบประกาศ
+                      </button>
+                    </div>
+                  ))}
+                  {announcements.length === 0 && (
+                    <p className="text-center py-4 text-gray-500 text-sm">ยังไม่มีประกาศในระบบ</p>
+                  )}
+                </div>
               </div>
 
               <div className="overflow-x-auto">
