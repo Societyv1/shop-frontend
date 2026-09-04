@@ -20,9 +20,6 @@ socket.on('connect_error', (err) => {
   console.error('🔴 Socket.IO Connection Error:', err.message);
 });
 
-// ==========================================
-// ระบบพื้นหลัง Particles สไตล์ Hacker/Premium
-// ==========================================
 const ParticlesBackground = () => {
   const canvasRef = useRef(null);
 
@@ -136,14 +133,10 @@ const ParticlesBackground = () => {
   return <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full z-[-1] pointer-events-none" style={{background: 'linear-gradient(to bottom, #050508, #0a0a0f)'}} />;
 };
 
-// ==========================================
-// ระบบหลัก (Main App)
-// ==========================================
 export default function SOCIETYxSHOP() {
-const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   useEffect(() => {
-    // เช็กว่าผู้ใช้เคยยอมรับเงื่อนไขในเครื่องนี้หรือยัง
     const acceptedTerms = localStorage.getItem('accepted_terms');
     if (!acceptedTerms) {
       setShowTermsModal(true);
@@ -182,52 +175,48 @@ const [showTermsModal, setShowTermsModal] = useState(false);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
+  const [announcements, setAnnouncements] = useState([]);
+  const [promoCodeInput, setPromoCodeInput] = useState('');
   
-  // 🌟 ลิงก์ช่องทางติดต่อ
   const STORE_LINKS = {
     discord: "https://discord.gg/TApFSKWtYK",
     tiktok: "https://www.tiktok.com/@societyxshopv1?is_from_webapp=1&sender_device=pc",
     youtube: "https://www.youtube.com/channel/UCr60L8rgOnVKaGTil_NPMgw",
     external: "https://www.mediafire.com/file/tjhm8q83phd98yg/SOCIETYWEB.rar/file",
-    reshade: "https://www.mediafire.com/file/rnj6giipr99ji6y/%25E0%25B8%25A3%25E0%25B8%25B5%25E0%25B9%2580%25E0%25B8%258A%25E0%25B8%25A3%25E0%25B8%2594_Society.rar/file",
+    reshade: "https://www.mediafire.com/file/rnj6giipr99ji6y/%25E0%25B8%25A3%25E0%25B8%25B5%25E0%25B9%2580%25E0%25B8%258A%25E0%25B8%2594_Society.rar/file",
     cmd: "https://www.mediafire.com/file/tf8mshzaz0j6a9m/CMD+society.rar/file",
     systempf: "https://www.mediafire.com/file/g6caw7kn5j4fy4f/OPTIMIZATION_-_THE_ULTIMATE_CONFIG.bat/file"
   };
 
   useEffect(() => {
-      loadProducts();
-      checkAuth();
-  
-      // 🟢 ระบบดักฟัง Real-time เมื่อมีคำสั่งซื้อสำเร็จจากหลังบ้าน
-      socket.on('productSold', (data) => {
-  console.log('🔥 ได้รับ productSold:', data);
+    loadProducts();
+    checkAuth();
+    loadAnnouncements();
 
-  setProducts((prevProducts) =>
-    prevProducts.map((product) =>
-      product._id === data.productId
-        ? { ...product, soldCount: data.newSoldCount }
-        : product
-    )
-  );
+    socket.on('productSold', (data) => {
+      setProducts((prevProducts) =>
+        prevProducts.map((product) =>
+          product._id === data.productId
+            ? { ...product, soldCount: data.newSoldCount }
+            : product
+        )
+      );
+      setRecentPurchase(data);
+    });
 
-  setRecentPurchase(data);
-});
-  
-      // 🟢 ล้างการเชื่อมต่อเมื่อผู้ใช้ปิดหน้าเว็บ (ต้องอยู่ "ข้างใน" useEffect บล็อกแรก)
-      return () => {
-        socket.off('productSold');
-      };
-    }, []); // <-- ปิดบล็อกที่ 1 ตรงนี้ครับ
-  
-    // 🟢 ตั้งเวลาปิด Pop-up Recent Purchase (บล็อกที่ 2 แยกออกมาแบบนี้ถูกต้องแล้วครับ)
-    useEffect(() => {
-      if (recentPurchase) {
-        const timer = setTimeout(() => {
-          setRecentPurchase(null);
-        }, 6000); // โชว์ค้างไว้ 6 วินาทีแล้วค่อยหายไป
-        return () => clearTimeout(timer);
-      }
-    }, [recentPurchase]); 
+    return () => {
+      socket.off('productSold');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (recentPurchase) {
+      const timer = setTimeout(() => {
+        setRecentPurchase(null);
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [recentPurchase]); 
 
   const checkAuth = async () => {
     const token = localStorage.getItem('token');
@@ -247,11 +236,23 @@ const [showTermsModal, setShowTermsModal] = useState(false);
       }
     }
   };
-const handleAcceptTerms = () => {
+
+  const loadAnnouncements = async () => {
+    try {
+      const res = await fetch(`${API_URL}/announcements`);
+      if (res.ok) {
+        const data = await res.json();
+        setAnnouncements(data);
+      }
+    } catch (err) {}
+  };
+
+  const handleAcceptTerms = () => {
     localStorage.setItem('accepted_terms', 'true');
     setShowTermsModal(false);
     showNotification('✓ ยอมรับเงื่อนไขการให้บริการเรียบร้อยแล้ว', 'success');
   };
+
   const loadProducts = async () => {
     try {
       const res = await fetch(`${API_URL}/products`);
@@ -282,7 +283,6 @@ const handleAcceptTerms = () => {
     } catch (err) {}
   };
 
-  // 🟢 ดึงสถิติ + รายชื่อลูกค้า
   const loadAdminData = async () => {
     const token = localStorage.getItem('token');
     try {
@@ -294,7 +294,6 @@ const handleAcceptTerms = () => {
     } catch (err) {}
   };
 
-  // 🟢 ฟังก์ชันสำหรับ แอดมินปรับเพิ่ม/ลด เงิน
   const handleUpdateBalance = async (userId, username, tag, currentBalance, action) => {
     const actionText = action === 'add' ? 'เพิ่มเงินให้' : 'หักเงินจาก';
     const amount = prompt(`ต้องการ ${actionText} ${username}#${tag}\nยอดปัจจุบัน: ฿${currentBalance}\n\nระบุจำนวนเงินที่ต้องการ (บาท):`);
@@ -311,7 +310,7 @@ const handleAcceptTerms = () => {
       const data = await res.json();
       if (res.ok) {
         showNotification(data.message, 'success');
-        loadAdminData(); // โหลดตารางใหม่ให้ยอดเงินอัปเดตทันที
+        loadAdminData();
       } else {
         showNotification(data.message, 'error');
       }
@@ -371,8 +370,6 @@ const handleAcceptTerms = () => {
       reader.readAsDataURL(file);
     }
   };
-
-const [promoCodeInput, setPromoCodeInput] = useState('');
 
   const handleRedeemPromoCode = async () => {
     if (!promoCodeInput.trim()) return showNotification('⚠ กรุณากรอกโค้ดส่วนลดก่อน', 'warning');
@@ -520,13 +517,11 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
   
   const categories = ['ทั้งหมด', ...new Set(products.map(p => p.category))];
 
-  // 🟢 โค้ดสำหรับค้นหารายชื่อลูกค้าในหน้า Admin
   const filteredAdminUsers = adminUsers.filter(u => 
     `${u.username}#${u.tag}`.toLowerCase().includes(userSearch.toLowerCase()) || 
     u.email.toLowerCase().includes(userSearch.toLowerCase())
   );
 
-  // CSS แกนหลัก
   const globalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700;900&family=Poppins:wght@400;600;800;900&display=swap');
     body { margin: 0; padding: 0; font-family: 'Kanit', sans-serif; background-color: #07070a; color: #fff; }
@@ -591,9 +586,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
     }
   `;
 
-  // ==========================================
-  // 🚀 1. LANDING PAGE
-  // ==========================================
   if (currentPage === 'landing') {
     return (
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden px-4">
@@ -661,7 +653,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
     );
   }
 
-  // ========== AUTH PAGE ==========
   if (currentPage === 'auth' && !user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -864,9 +855,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
     );
   }
 
-  // ==========================================
-  // 🛒 3. MAIN APP
-  // ==========================================
   if (!user && !isGuest) return null;
 
   return (
@@ -874,7 +862,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
       <style>{globalStyles}</style>
       <ParticlesBackground />
 
-      {/* HEADER */}
       <header className="glass-panel border-b-0 border-white/5 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="logo-glitch group cursor-pointer" onClick={() => { isGuest ? setCurrentPage('landing') : setCurrentPage('shop') }}>
@@ -913,10 +900,8 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
           </div>
         </div>
 
-        {/* NAV TABS */}
         <div className="border-t border-white/5 bg-black/20">
           <div className="max-w-6xl mx-auto px-6 py-2 flex gap-2 overflow-x-auto">
-            {/* 🛡️ ปุ่มจัดการหลังบ้าน (เฉพาะแอดมิน) */}
             {user?.isAdmin && (
               <button onClick={() => { setCurrentPage('admin'); loadAdminData(); }} className={`nav-btn ${currentPage === 'admin' ? 'active' : ''}`}>
                 <ShieldCheck size={18} className="inline mr-2 mb-1" /> จัดการหลังบ้าน
@@ -945,18 +930,30 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
               <Phone size={18} className="inline mr-2 mb-1" /> ติดต่อเรา
             </button>
             <button onClick={() => setCurrentPage('reviews')} className={`nav-btn ${currentPage === 'reviews' ? 'active' : ''}`}>
-  ⭐ รีวิวจากลูกค้า
-</button>
+              ⭐ รีวิวจากลูกค้า
+            </button>
           </div>
         </div>
       </header>
 
-      {/* CONTENT */}
       <main className="max-w-6xl mx-auto px-6 py-8 relative z-10">
         
-        {/* SHOP PAGE */}
         {currentPage === 'shop' && (
           <div className="fade-in">
+            {announcements.length > 0 && (
+              <div className="space-y-3 mb-8">
+                {announcements.map((item) => (
+                  <div key={item._id} className="glass-panel border border-yellow-500/30 bg-yellow-500/5 px-6 py-4 rounded-2xl flex items-center justify-between fade-in">
+                    <div className="flex items-center gap-3">
+                      <span className="text-yellow-500 text-xl">📢</span>
+                      <p className="text-gray-200 text-sm md:text-base font-medium">{item.message}</p>
+                    </div>
+                    <span className="text-xs text-gray-500 whitespace-nowrap">{new Date(item.createdAt).toLocaleDateString('th-TH')}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {isGuest && (
                <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 px-6 py-4 rounded-2xl mb-6 flex items-center justify-between">
                  <span className="font-bold flex items-center gap-2"><User size={20}/> โหมดเยี่ยมชม (Guest)</span>
@@ -987,8 +984,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map((product, index) => (
                 <div key={product._id} className="smooth-hover glass-panel rounded-2xl p-4 flex flex-col border-white/5 overflow-hidden group" style={{animationDelay: `${index * 0.1}s`}}>
-                  
-                  {/* 🖼️ ส่วนแสดงรูปภาพสินค้า */}
                   {product.image ? (
                     <div className="w-full h-48 mb-4 rounded-xl overflow-hidden relative">
                       <img 
@@ -1009,7 +1004,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                     </div>
                   )}
 
-                  {/* 📝 ส่วนข้อมูลชื่อและคำอธิบาย */}
                   <div className="flex-1 flex flex-col justify-between px-2">
                     <div>
                       <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
@@ -1055,7 +1049,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
           </div>
         )}
 
-        {/* 🌟 CONTACT PAGE */}
         {currentPage === 'contact' && (
           <div className="fade-in">
             <h2 className="text-3xl font-black mb-6">ติดต่อเรา (CONTACT)</h2>
@@ -1085,7 +1078,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
           </div>
         )}
 
-        {/* REFILL PAGE */}
         {currentPage === 'refill' && !isGuest && (
           <div className="fade-in">
             <h2 className="text-3xl font-black mb-6">เติมเงิน (REFILL)</h2>
@@ -1153,7 +1145,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
               )}
             </div>
 
-            {/* 🎟️ กล่องกรอกโค้ดเติมเงินรับโบนัส */}
             <div className="glass-panel border border-yellow-500/20 rounded-2xl p-6 mt-8">
               <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
                 <span className="text-yellow-500">🎁</span> แลกรับโค้ดส่วนลด / โบนัสเติมเงิน
@@ -1206,7 +1197,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
           </div>
         )}
 
-        {/* ORDERS PAGE */}
         {currentPage === 'orders' && !isGuest && (
           <div className="fade-in">
             <h2 className="text-3xl font-black mb-6">ประวัติการสั่งซื้อ (ORDERS)</h2>
@@ -1220,14 +1210,12 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 const pName = order.productName.toUpperCase(); 
                 let productType = 'admin_install'; 
                 
-                // 1. เช็คว่าเป็นสินค้าประเภทไหน (ค้นหาจากคำว่า SYSTEM TUNING)
                 if (pName.includes('CMD')) { 
                   productType = 'key_and_download'; 
                 } else if (pName.includes('EXTERNAL') || pName.includes('RESHADE') || pName.includes('SYSTEM TUNING') || order.downloadUrl) { 
                   productType = 'download_only'; 
                 }
                 
-                // 2. ดึงลิงก์มาใส่ในปุ่มดาวน์โหลด
                 let dLink = order.downloadUrl || "#"; 
                 if (dLink === "#") {
                   if (pName.includes('EXTERNAL')) dLink = STORE_LINKS.external; 
@@ -1309,7 +1297,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
           </div>
         )}
         
-        {/* PROFILE PAGE */}
         {currentPage === 'profile' && !isGuest && (
           <div className="fade-in">
             <h2 className="text-3xl font-black mb-6">ข้อมูลผู้ใช้งาน (PROFILE)</h2>
@@ -1321,9 +1308,9 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-white mb-1">
-   {user.username}
-   {user.tag && <span className="text-gray-500 text-lg ml-1">#{user.tag}</span>}
-</h3>
+                      {user.username}
+                      {user.tag && <span className="text-gray-500 text-lg ml-1">#{user.tag}</span>}
+                    </h3>
                     <span className="bg-white/10 text-gray-300 text-xs px-3 py-1 rounded-full border border-white/10">สมาชิกระบบ</span>
                   </div>
                 </div>
@@ -1395,7 +1382,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
           </div>
         )}
 
-{/* ⭐ CUSTOMER REVIEWS PAGE (หน้ารีวิวจากลูกค้า) */}
         {currentPage === 'reviews' && (
           <div className="fade-in space-y-8 pb-12">
             <div className="text-center max-w-2xl mx-auto mb-10">
@@ -1404,10 +1390,7 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
               <div className="w-20 h-1 bg-yellow-500 rounded-full mx-auto mt-4"></div>
             </div>
 
-            {/* Grid รีวิวสินค้าและบริการ */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              
-              {/* รีวิวที่ 1 */}
               <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -1422,7 +1405,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 </div>
               </div>
 
-              {/* รีวิวที่ 2 */}
               <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -1437,7 +1419,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 </div>
               </div>
 
-              {/* รีวิวที่ 3 */}
               <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -1452,7 +1433,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 </div>
               </div>
 
-              {/* รีวิวที่ 4 */}
               <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -1467,7 +1447,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 </div>
               </div>
 
-              {/* รีวิวที่ 5 */}
               <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -1482,7 +1461,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 </div>
               </div>
 
-              {/* รีวิวที่ 6 */}
               <div className="glass-panel p-6 rounded-3xl border-white/5 flex flex-col justify-between smooth-hover">
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -1496,10 +1474,8 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                   <span>28/8/2569</span>
                 </div>
               </div>
-
             </div>
 
-            {/* กล่องเชิญชวนเข้า Discord ไปดูรีวิวเพิ่ม */}
             <div className="glass-panel p-8 rounded-3xl border-yellow-500/20 text-center max-w-xl mx-auto mt-12 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-2xl"></div>
               <h3 className="text-xl font-bold text-white mb-2">อยากดูรีวิวเพิ่มเติมหรือพูดคุยกับเพื่อนๆ?</h3>
@@ -1516,7 +1492,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
           </div>
         )}
 
-        {/* 👑 ADMIN PAGE (เพิ่งเพิ่มมาใหม่!) */}
         {currentPage === 'admin' && user?.isAdmin && (
           <div className="fade-in space-y-8 pb-10">
             <h2 className="text-3xl font-black mb-6 flex items-center gap-2">👑 ระบบแอดมิน</h2>
@@ -1532,12 +1507,11 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 <p className="text-2xl font-black text-white eng-num">{adminStats?.usersCount || 0} คน</p>
               </div>
             </div>
-{/* 🟢 เริ่ม: ตารางจัดการผู้ใช้งาน (User Management) */}
+
             <div className="glass-panel p-8 rounded-3xl border-white/5 mt-8">
               <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
                 <h3 className="text-xl font-bold flex items-center gap-2"><User size={20}/> จัดการผู้ใช้งาน & เติมเงิน</h3>
                 
-                {/* ช่องค้นหา */}
                 <div className="relative">
                   <input 
                     type="text" 
@@ -1549,63 +1523,111 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                   <Search size={18} className="absolute left-3 top-2.5 text-gray-500" />
                 </div>
               </div>
-              {/* 🎟️ กล่องสร้างโค้ดส่วนลดสำหรับแอดมิน */}
-<div className="glass-panel p-8 rounded-3xl border-white/5 mt-8">
-  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">🎁 สร้างโค้ดเติมเงิน (Promo Code)</h3>
-  <form onSubmit={async (e) => {
-    e.preventDefault();
-    const code = e.target.promoCode.value;
-    const bonus = e.target.bonusAmount.value;
-    const uses = e.target.maxUses.value;
 
-    try {
-      const res = await fetch(`${API_URL}/admin/promo-codes`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
-          'Authorization': `Bearer ${localStorage.getItem('token')}` 
-        },
-        body: JSON.stringify({ code, bonusAmount: bonus, maxUses: uses })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        showNotification(`✓ ${data.message}`, 'success');
-        e.target.reset();
-      } else {
-        showNotification(data.message || 'สร้างโค้ดไม่สำเร็จ', 'error');
-      }
-    } catch (err) {
-      showNotification('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
-    }
-  }} className="space-y-4">
-    <input 
-      type="text" 
-      name="promoCode" 
-      placeholder="ชื่อโค้ด (เช่น FREE50)" 
-      className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white uppercase outline-none focus:border-yellow-500" 
-      required 
-    />
-    <input 
-      type="number" 
-      name="bonusAmount" 
-      placeholder="จำนวนเงินโบนัสที่จะได้รับ (บาท)" 
-      className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:border-yellow-500" 
-      required 
-    />
-    <input 
-      type="number" 
-      name="maxUses" 
-      placeholder="จำนวนครั้งที่ใช้ได้ (เช่น 50 ครั้ง)" 
-      className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:border-yellow-500" 
-      defaultValue="100" 
-      required 
-    />
-    <button type="submit" className="w-full py-4 bg-yellow-500 text-black font-black rounded-xl hover:bg-yellow-400 transition-all shadow-lg">
-      ยืนยันการสร้างโค้ด
-    </button>
-  </form>
-</div>
-              {/* ตารางแสดงรายชื่อ */}
+              <div className="glass-panel p-8 rounded-3xl border-white/5 mt-8 mb-8">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">🎁 สร้างโค้ดเติมเงิน (Promo Code)</h3>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const code = e.target.promoCode.value;
+                  const bonus = e.target.bonusAmount.value;
+                  const uses = e.target.maxUses.value;
+                  const expiresAt = e.target.expiresAt.value;
+
+                  try {
+                    const res = await fetch(`${API_URL}/admin/promo-codes`, {
+                      method: 'POST',
+                      headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                      },
+                      body: JSON.stringify({ code, bonusAmount: bonus, maxUses: uses, expiresAt })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                      showNotification(`✓ ${data.message}`, 'success');
+                      e.target.reset();
+                    } else {
+                      showNotification(data.message || 'สร้างโค้ดไม่สำเร็จ', 'error');
+                    }
+                  } catch (err) {
+                    showNotification('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                  }
+                }} className="space-y-4">
+                  <input 
+                    type="text" 
+                    name="promoCode" 
+                    placeholder="ชื่อโค้ด (เช่น FREE50)" 
+                    className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white uppercase outline-none focus:border-yellow-500" 
+                    required 
+                  />
+                  <input 
+                    type="number" 
+                    name="bonusAmount" 
+                    placeholder="จำนวนเงินโบนัสที่จะได้รับ (บาท)" 
+                    className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:border-yellow-500" 
+                    required 
+                  />
+                  <input 
+                    type="number" 
+                    name="maxUses" 
+                    placeholder="จำนวนครั้งที่ใช้ได้ (เช่น 50 ครั้ง)" 
+                    className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:border-yellow-500" 
+                    defaultValue="100" 
+                    required 
+                  />
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-400">วันและเวลาหมดอายุ (ไม่ใส่ = ไม่มีวันหมดอายุ)</label>
+                    <input 
+                      type="datetime-local" 
+                      name="expiresAt" 
+                      className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:border-yellow-500" 
+                    />
+                  </div>
+                  <button type="submit" className="w-full py-4 bg-yellow-500 text-black font-black rounded-xl hover:bg-yellow-400 transition-all shadow-lg">
+                    ยืนยันการสร้างโค้ด
+                  </button>
+                </form>
+              </div>
+
+              {/* 📢 กล่องแอดมินสร้างประกาศหน้าเว็บ */}
+              <div className="glass-panel p-8 rounded-3xl border-white/5 mb-8">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">📢 สร้างประกาศหน้าเว็บ (Announcement)</h3>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const message = e.target.announceMessage.value;
+                  try {
+                    const res = await fetch(`${API_URL}/admin/announcements`, {
+                      method: 'POST',
+                      headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                      },
+                      body: JSON.stringify({ message })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                      showNotification(`✓ ${data.message}`, 'success');
+                      e.target.reset();
+                      loadAnnouncements();
+                    } else {
+                      showNotification(data.message || 'สร้างประกาศไม่สำเร็จ', 'error');
+                    }
+                  } catch (err) {
+                    showNotification('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                  }
+                }} className="space-y-4">
+                  <textarea 
+                    name="announceMessage" 
+                    placeholder="ข้อความประกาศ เช่น แจกโค้ดส่วนลดฟรี 50 บาท รีบใช้ก่อนหมดเขต!" 
+                    className="w-full h-24 bg-black/50 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-500"
+                    required
+                  ></textarea>
+                  <button type="submit" className="w-full py-4 bg-yellow-500 text-black font-black rounded-xl hover:bg-yellow-400 transition-all shadow-lg">
+                    โพสต์ประกาศหน้าเว็บ
+                  </button>
+                </form>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -1627,7 +1649,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                         <td className="py-4 px-2 text-right text-yellow-400 font-bold eng-num">฿{u.balance.toFixed(2)}</td>
                         <td className="py-4 px-2">
                           <div className="flex items-center justify-center gap-2">
-                            {/* ปุ่ม หักเงิน */}
                             <button 
                               onClick={() => handleUpdateBalance(u._id, u.username, u.tag || '0000', u.balance, 'subtract')}
                               className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg transition-colors border border-red-500/20"
@@ -1635,7 +1656,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                             >
                               <Minus size={16} />
                             </button>
-                            {/* ปุ่ม เพิ่มเงิน */}
                             <button 
                               onClick={() => handleUpdateBalance(u._id, u.username, u.tag || '0000', u.balance, 'add')}
                               className="bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white p-2 rounded-lg transition-colors border border-green-500/20"
@@ -1654,8 +1674,7 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                 </table>
               </div>
             </div>
-            
-            {/* 🟢 จบ: ตารางจัดการผู้ใช้งาน */}
+
             <div className="glass-panel p-8 rounded-3xl border-white/5">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><PlusCircle size={20}/> เติมคีย์สินค้า (Bulk Add)</h3>
               <div className="space-y-4">
@@ -1684,7 +1703,7 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, 
                         body: JSON.stringify({ productName: selectedAdminProduct, keysString: bulkKeys }) 
                       });
-                      const data = await res.json(); // ดึงข้อมูลที่หลังบ้านส่งกลับมา
+                      const data = await res.json();
                       
                       if(res.ok) { 
                         showNotification("✓ เพิ่มคีย์เข้าสต็อกสำเร็จ!", "success"); 
@@ -1692,7 +1711,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
                         loadProducts(); 
                         loadAdminData();
                       } else {
-                        // 🚨 ถ้า Error ให้โชว์ข้อความสีแดง
                         showNotification(`❌ ${data.message || 'เพิ่มคีย์ไม่สำเร็จ'}`, "error"); 
                       }
                     } catch (err) {
@@ -1712,7 +1730,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
 
       </main>
 
-      {/* --- BUY MODAL --- */}
       {showBuyModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4 fade-in">
           <div className="glass-panel border border-yellow-500/40 rounded-3xl p-8 max-w-sm w-full shadow-[0_0_40px_rgba(212,175,55,0.15)]">
@@ -1734,7 +1751,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
         </div>
       )}
 
-      {/* --- NOTIFICATION --- */}
       {notification && (
         <div className="fixed bottom-6 right-6 z-[110] flex items-center gap-3 px-6 py-4 rounded-xl font-bold glass-panel fade-in border border-white/10 shadow-2xl">
           {notification.type === 'success' ? <CheckCircle size={20} className="text-green-400" /> : notification.type === 'warning' ? <AlertCircle size={20} className="text-yellow-400"/> : <AlertCircle size={20} className="text-red-400" />}
@@ -1744,10 +1760,8 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
         </div>
       )}
 
-      {/* 🟢 ย้าย RECENT PURCHASE POPUP (มุมซ้ายล่าง) มาวางตรงนี้ครับ 🟢 */}
       {recentPurchase && (
         <div className="fixed bottom-6 left-6 z-[110] flex items-center gap-4 p-3 pr-6 rounded-2xl glass-panel border border-yellow-500/30 shadow-[0_0_20px_rgba(212,175,55,0.15)] fade-in max-w-sm">
-          {/* รูปสินค้า */}
           {recentPurchase.productImage ? (
             <img src={recentPurchase.productImage} alt="product" className="w-16 h-16 object-cover rounded-xl border border-white/10" />
           ) : (
@@ -1756,7 +1770,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
             </div>
           )}
           
-          {/* ข้อความ */}
           <div className="flex flex-col">
             <span className="text-[10px] bg-green-500 text-black font-black px-2 py-0.5 rounded-md w-fit mb-1 animate-pulse">
               การสั่งซื้อล่าสุด
@@ -1767,19 +1780,17 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
           </div>
         </div>
       )}
-        {/* 📜 TERMS OF SERVICE MODAL */}
+
       {showTermsModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 fade-in">
           <div className="glass-panel border border-yellow-500/40 rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-[0_0_50px_rgba(212,175,55,0.2)] flex flex-col max-h-[90vh]">
             
-            {/* หัวข้อ */}
             <div className="text-center mb-6">
               <h3 className="text-2xl font-black text-white mb-1">ข้อกำหนดและเงื่อนไขการให้บริการ</h3>
               <p className="text-yellow-500 text-xs tracking-widest font-poppins uppercase">SOCIETY×SHOP - TERMS OF SERVICE</p>
               <div className="w-16 h-1 bg-yellow-500 rounded-full mx-auto mt-3"></div>
             </div>
 
-            {/* เนื้อหากฎ (ภาษาทางการ อ่านง่าย สบายตา) */}
             <div className="overflow-y-auto space-y-4 pr-2 text-gray-300 text-sm leading-relaxed mb-6 custom-scrollbar bg-black/40 p-5 rounded-2xl border border-white/5">
               <div>
                 <h4 className="text-white font-bold mb-1 flex items-center gap-2">⚠️ 1. นโยบายการห้ามจำหน่ายต่อ (No Resell)</h4>
@@ -1817,7 +1828,6 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
               </div>
             </div>
 
-            {/* ปุ่มยอมรับ */}
             <button 
               onClick={handleAcceptTerms}
               className="smooth-btn w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold text-base rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:brightness-110"
@@ -1830,5 +1840,4 @@ const [promoCodeInput, setPromoCodeInput] = useState('');
       )}
     </div> 
   ); 
-} 
-
+}
