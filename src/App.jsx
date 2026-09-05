@@ -1495,6 +1495,23 @@ export default function SOCIETYxSHOP() {
         {currentPage === 'admin' && user?.isAdmin && (
           <div className="fade-in space-y-8 pb-10">
             <h2 className="text-3xl font-black mb-6 flex items-center gap-2">👑 ระบบแอดมิน</h2>
+            <button 
+  onClick={async () => {
+    try {
+      const res = await fetch(`${API_URL}/499k/test-products`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await res.json();
+      console.log("🔥 ข้อมูล 499K:", data);
+      alert("ดึงข้อมูลสำเร็จ! กด F12 ดูใน Console ได้เลย");
+    } catch(err) {
+      alert("พังครับ: " + err.message);
+    }
+  }}
+  className="bg-blue-500 text-white px-4 py-2 rounded-xl mb-4 font-bold"
+>
+  🔍 เทสต์ดึงข้อมูล 499K
+</button>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="glass-panel p-6 rounded-2xl border-white/5">
