@@ -3,7 +3,7 @@ import {
   LogOut, Wallet, ShoppingBag, User, 
   AlertCircle, CheckCircle, Clock, Key, Download, ArrowRight, 
   Phone, MessageSquare, Video, Smartphone, ShieldCheck, PlusCircle,
-  Search, Plus, Minus
+  Search, Plus, Minus, RefreshCw
 } from 'lucide-react';
 import { io } from 'socket.io-client'; 
 
@@ -1495,23 +1495,34 @@ export default function SOCIETYxSHOP() {
         {currentPage === 'admin' && user?.isAdmin && (
           <div className="fade-in space-y-8 pb-10">
             <h2 className="text-3xl font-black mb-6 flex items-center gap-2">👑 ระบบแอดมิน</h2>
+
+            {/* 🔥 ปุ่มดูดของจาก 499K */}
             <button 
-  onClick={async () => {
-    try {
-      const res = await fetch(`${API_URL}/499k/test-products`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await res.json();
-      console.log("🔥 ข้อมูล 499K:", data);
-      alert("ดึงข้อมูลสำเร็จ! กด F12 ดูใน Console ได้เลย");
-    } catch(err) {
-      alert("พังครับ: " + err.message);
-    }
-  }}
-  className="bg-blue-500 text-white px-4 py-2 rounded-xl mb-4 font-bold"
->
-  🔍 เทสต์ดึงข้อมูล 499K
-</button>
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  const res = await fetch(`${API_URL}/admin/sync-499k`, { 
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } 
+                  });
+                  const data = await res.json();
+                  if(res.ok) { 
+                    showNotification(`✓ ${data.message}`, "success"); 
+                    loadProducts(); // รีเฟรชหน้าร้านทันที
+                  } else {
+                    showNotification(`❌ ${data.message}`, "error"); 
+                  }
+                } catch (err) {
+                  showNotification("❌ เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ", "error");
+                }
+                setLoading(false);
+              }} 
+              disabled={loading}
+              className="bg-purple-600 text-white px-5 py-3 rounded-xl mb-4 font-bold hover:bg-purple-500 transition-all flex items-center gap-2 shadow-lg shadow-purple-500/20 disabled:opacity-50"
+            >
+              <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
+              {loading ? 'กำลังซิงค์ข้อมูล...' : 'ซิงค์สินค้าจากโกดัง 499K เข้าร้าน'}
+            </button>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="glass-panel p-6 rounded-2xl border-white/5">
