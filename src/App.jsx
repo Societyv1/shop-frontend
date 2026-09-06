@@ -137,6 +137,31 @@ export default function SOCIETYxSHOP() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [steamCodes, setSteamCodes] = useState({});
   const [fetchingCode, setFetchingCode] = useState({});
+  const [guardCooldowns, setGuardCooldowns] = useState({});
+
+// ⏱️ ระบบนับเวลาถอยหลังปุ่มขอ Steam Guard (ลดลงทีละ 1 วินาที)
+useEffect(() => {
+  const timer = setInterval(() => {
+    setGuardCooldowns((prev) => {
+      const updatedCooldowns = { ...prev };
+      let hasChanges = false;
+
+      Object.keys(updatedCooldowns).forEach((orderId) => {
+        if (updatedCooldowns[orderId] > 0) {
+          updatedCooldowns[orderId] -= 1;
+          hasChanges = true;
+        } else {
+          delete updatedCooldowns[orderId]; // ถ้าเวลาหมดแล้ว ให้ลบทิ้ง
+          hasChanges = true;
+        }
+      });
+
+      return hasChanges ? updatedCooldowns : prev;
+    });
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
 
   useEffect(() => {
     const acceptedTerms = localStorage.getItem('accepted_terms');
@@ -330,6 +355,7 @@ const handleGetSteamGuard = async (orderId) => {
       const data = await res.json();
       if (res.ok && data.success) {
         setSteamCodes(prev => ({ ...prev, [orderId]: data.code }));
+        setGuardCooldowns(prev => ({ ...prev, [orderId]: 60 }));
         showNotification('ดึงโค้ด Steam Guard สำเร็จ!', 'success');
       } else {
         showNotification(data.message || 'ขอโค้ดไม่สำเร็จ', 'error');
@@ -1320,12 +1346,22 @@ const handleGetSteamGuard = async (orderId) => {
                                 </div>
                               ) : (
                                 <button 
-                                  onClick={() => handleGetSteamGuard(order._id)}
-                                  disabled={fetchingCode[order._id]}
-                                  className="smooth-btn bg-green-500 hover:bg-green-400 text-black px-4 py-2.5 rounded-lg font-bold text-sm transition-all whitespace-nowrap shadow-[0_0_10px_rgba(34,197,94,0.3)] disabled:opacity-50"
-                                >
-                                  {fetchingCode[order._id] ? 'กำลังดึงโค้ด...' : 'ขอโค้ด Steam Guard'}
-                                </button>
+  onClick={() => handleGetSteamGuard(order._id)}
+  disabled={guardCooldowns[order._id] > 0 || fetchingCode[order._id]}
+  className={`smooth-btn px-4 py-2.5 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
+    guardCooldowns[order._id] > 0
+      ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed shadow-none'
+      : 'bg-green-500 hover:bg-green-400 text-black shadow-[0_0_10px_rgba(34,197,94,0.3)] disabled:opacity-50'
+  }`}
+>
+  {fetchingCode[order._id] ? (
+    'กำลังดึงโค้ด...'
+  ) : guardCooldowns[order._id] > 0 ? (
+    `รอ ${guardCooldowns[order._id]} วิ`
+  ) : (
+    'ขอโค้ด Steam Guard'
+  )}
+</button>
                               )}
                             </div>
                           </div>
