@@ -1210,7 +1210,11 @@ export default function SOCIETYxSHOP() {
                 const pName = order.productName.toUpperCase(); 
                 let productType = 'admin_install'; 
                 
-                if (pName.includes('CMD')) { 
+                // เช็กเพิ่ม: ถ้าข้อมูลที่ได้มาขึ้นต้นด้วย ID: แสดงว่าเป็นสินค้า 499K (บัญชีเกม)
+                if (order.licenseKey && order.licenseKey.startsWith('ID:')) {
+                  productType = 'account_info';
+                }
+                else if (pName.includes('CMD')) { 
                   productType = 'key_and_download'; 
                 } else if (pName.includes('EXTERNAL') || pName.includes('RESHADE') || pName.includes('SYSTEM TUNING') || order.downloadUrl) { 
                   productType = 'download_only'; 
@@ -1255,6 +1259,19 @@ export default function SOCIETYxSHOP() {
                         </div>
                       )}
                       
+                     {productType === 'account_info' && (
+                        <div className="bg-black/60 p-6 rounded-xl border border-blue-500/30 flex flex-col justify-center relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"></div>
+                          <span className="text-gray-400 text-sm mb-2 font-bold flex items-center gap-2">
+                            🎮 บัญชี Steam ของคุณ (ไอดี | รหัสผ่าน)
+                          </span>
+                          <code className="text-blue-400 font-bold eng-num text-lg md:text-xl select-all bg-blue-500/10 border border-blue-500/20 px-5 py-3 rounded-lg inline-block w-fit shadow-inner">
+                            {order.licenseKey}
+                          </code>
+                          <p className="text-gray-500 text-xs mt-3">⚠️ แนะนำ: เมื่อล็อกอินได้แล้ว กรุณาเปลี่ยนรหัสผ่านและผูกอีเมลของท่านเพื่อความปลอดภัย</p>
+                        </div>
+                      )}
+
                       {productType === 'download_only' && (
                         <div className="bg-black/60 p-6 rounded-xl border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-5">
                           <div>
