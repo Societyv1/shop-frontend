@@ -135,6 +135,8 @@ const ParticlesBackground = () => {
 
 export default function SOCIETYxSHOP() {
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [steamCodes, setSteamCodes] = useState({});
+  const [fetchingCode, setFetchingCode] = useState({});
 
   useEffect(() => {
     const acceptedTerms = localStorage.getItem('accepted_terms');
@@ -316,6 +318,26 @@ export default function SOCIETYxSHOP() {
       }
     } catch (err) { showNotification('เกิดข้อผิดพลาดในการปรับยอดเงิน', 'error'); }
     setLoading(false);
+  };
+
+const handleGetSteamGuard = async (orderId) => {
+    setFetchingCode(prev => ({ ...prev, [orderId]: true }));
+    try {
+      const res = await fetch(`${API_URL}/orders/${orderId}/steam-guard`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSteamCodes(prev => ({ ...prev, [orderId]: data.code }));
+        showNotification('ดึงโค้ด Steam Guard สำเร็จ!', 'success');
+      } else {
+        showNotification(data.message || 'ขอโค้ดไม่สำเร็จ', 'error');
+      }
+    } catch (err) {
+      showNotification('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+    }
+    setFetchingCode(prev => ({ ...prev, [orderId]: false }));
   };
 
   const handleBuy = (product) => {
@@ -1278,18 +1300,21 @@ export default function SOCIETYxSHOP() {
                                 </span>
                                 <span className="text-gray-500 text-xs">หากระบบถามหาโค้ด กดปุ่มเพื่อรับโค้ดเข้าใช้งาน</span>
                               </div>
-                              <button 
-                                onClick={async () => {
-                                  const reason = prompt("กรุณาระบุเหตุผลในการขอโค้ด (เช่น 'ล็อกอินครั้งแรก'):");
-                                  if (!reason) return;
-                                  
-                                  // ตอนนี้เราดึงมาโชว์แค่แจ้งเตือนไปก่อน พรุ่งนี้ค่อยมาเขียนฝั่ง Server
-                                  alert(`กำลังขอโค้ด Steam Guard สำหรับออเดอร์ ${order._id}\nเหตุผล: ${reason}`);
-                                }}
-                                className="smooth-btn bg-green-500 hover:bg-green-400 text-black px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap shadow-[0_0_10px_rgba(34,197,94,0.3)]"
-                              >
-                                ขอโค้ด Steam Guard
-                              </button>
+                              
+                              {steamCodes[order._id] ? (
+                                <div className="bg-green-500/10 border border-green-500/20 px-6 py-2 rounded-lg text-center animate-pulse">
+                                  <span className="text-xs text-green-500 block mb-1">โค้ดของคุณคือ</span>
+                                  <span className="text-2xl font-black text-green-400 tracking-widest eng-num">{steamCodes[order._id]}</span>
+                                </div>
+                              ) : (
+                                <button 
+                                  onClick={() => handleGetSteamGuard(order._id)}
+                                  disabled={fetchingCode[order._id]}
+                                  className="smooth-btn bg-green-500 hover:bg-green-400 text-black px-4 py-2.5 rounded-lg font-bold text-sm transition-all whitespace-nowrap shadow-[0_0_10px_rgba(34,197,94,0.3)] disabled:opacity-50"
+                                >
+                                  {fetchingCode[order._id] ? 'กำลังดึงโค้ด...' : 'ขอโค้ด Steam Guard'}
+                                </button>
+                              )}
                             </div>
                           </div>
                           
