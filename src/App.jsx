@@ -1014,11 +1014,21 @@ const handleGetSteamGuard = async (orderId) => {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#151518] via-transparent to-transparent"></div>
-                      {product.badge && (
-                        <div className="absolute top-3 right-3 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-black shadow-lg">
-                          {product.badge}
-                        </div>
-                      )}
+                      
+                      {/* กล่องใส่ป้ายเตือนต่างๆ */}
+                      <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                        {product.badge && (
+                          <div className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-black shadow-lg">
+                            {product.badge}
+                          </div>
+                        )}
+                        {/* 🔥 ป้ายเตือน Denuvo */}
+                        {product.denuvo && (
+                          <div className="bg-red-600/90 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg animate-pulse flex items-center gap-1 backdrop-blur-sm border border-red-400/50">
+                            <AlertCircle size={12} /> ติด Denuvo
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <div className="flex justify-end mb-2">
@@ -1868,6 +1878,19 @@ const handleGetSteamGuard = async (orderId) => {
           <div className="glass-panel border border-yellow-500/40 rounded-3xl p-8 max-w-sm w-full shadow-[0_0_40px_rgba(212,175,55,0.15)]">
             <h3 className="text-2xl font-black mb-2 text-white">ยืนยันการสั่งซื้อ</h3>
             <div className="w-12 h-1 bg-yellow-500 rounded-full mb-6"></div>
+            
+            {/* 🔥 กล่องเตือน Denuvo ในหน้ายืนยัน */}
+            {showBuyModal.denuvo && (
+               <div className="mb-4 bg-red-500/10 border border-red-500/30 p-3 rounded-xl fade-in">
+                 <p className="text-red-400 text-xs font-bold flex items-center gap-1.5 mb-1">
+                   <AlertCircle size={14}/> คำเตือน: เกมนี้มีระบบป้องกัน Denuvo
+                 </p>
+                 <p className="text-gray-400 text-[10px] leading-relaxed">
+                   ตัวเกมจำกัดการเข้าใช้งานครั้งแรก 5 เครื่อง/วัน หากคิวเต็มอาจจะต้องรอ 1-3 วันในการเข้าเกมครั้งแรก (เฉพาะตอนเข้าเกมครั้งแรกเท่านั้น)
+                 </p>
+               </div>
+            )}
+
             <p className="text-gray-300 mb-8 leading-relaxed">
               คุณต้องการสั่งซื้อ <span className="text-yellow-400 font-bold bg-yellow-500/10 px-2 py-1 rounded-md">{showBuyModal.name}</span><br/>
               ในราคา <span className="text-yellow-400 font-black text-2xl eng-num pl-1">฿{showBuyModal.price}</span> ใช่หรือไม่?
