@@ -1265,10 +1265,37 @@ export default function SOCIETYxSHOP() {
                           <span className="text-gray-400 text-sm mb-2 font-bold flex items-center gap-2">
                             🎮 บัญชี Steam ของคุณ (ไอดี | รหัสผ่าน)
                           </span>
-                          <code className="text-blue-400 font-bold eng-num text-lg md:text-xl select-all bg-blue-500/10 border border-blue-500/20 px-5 py-3 rounded-lg inline-block w-fit shadow-inner">
+                          <code className="text-blue-400 font-bold eng-num text-lg md:text-xl select-all bg-blue-500/10 border border-blue-500/20 px-5 py-3 rounded-lg inline-block w-fit shadow-inner mb-4">
                             {order.licenseKey}
                           </code>
-                          <p className="text-gray-500 text-xs mt-3">⚠️ แนะนำ: เมื่อล็อกอินได้แล้ว กรุณาเปลี่ยนรหัสผ่านและผูกอีเมลของท่านเพื่อความปลอดภัย</p>
+                          
+                          {/* ส่วนของ Steam Guard */}
+                          <div className="bg-gray-900/80 border border-white/5 p-4 rounded-xl mt-2 relative z-10">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                              <div>
+                                <span className="text-white font-bold text-sm block mb-1 flex items-center gap-2">
+                                  <ShieldCheck size={16} className="text-green-400"/> Steam Guard Code
+                                </span>
+                                <span className="text-gray-500 text-xs">หากระบบถามหาโค้ด กดปุ่มเพื่อรับโค้ดเข้าใช้งาน</span>
+                              </div>
+                              <button 
+                                onClick={async () => {
+                                  const reason = prompt("กรุณาระบุเหตุผลในการขอโค้ด (เช่น 'ล็อกอินครั้งแรก'):");
+                                  if (!reason) return;
+                                  
+                                  // ตอนนี้เราดึงมาโชว์แค่แจ้งเตือนไปก่อน พรุ่งนี้ค่อยมาเขียนฝั่ง Server
+                                  alert(`กำลังขอโค้ด Steam Guard สำหรับออเดอร์ ${order._id}\nเหตุผล: ${reason}`);
+                                }}
+                                className="smooth-btn bg-green-500 hover:bg-green-400 text-black px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap shadow-[0_0_10px_rgba(34,197,94,0.3)]"
+                              >
+                                ขอโค้ด Steam Guard
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <p className="text-gray-500 text-xs mt-4">⚠️ สำคัญ: อย่าลืมปรับออฟไลน์ทุกครั้งก่อนเข้าเล่น หากไม่ได้ปรับออฟไลน์จะทำให้หลุดออกจากระบบ และจะต้องสั่งซื้อใหม่
+
+สำคัญ: ลง Windows ใหม่ กรุณาแจ้งแอดมินและออกจากระบบก่อน หากไม่ได้แจ้งและออกจากระบบก่อนจะต้องสั่งซื้อใหม่เท่านั้น</p>
                         </div>
                       )}
 
