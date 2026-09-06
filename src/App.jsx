@@ -1340,29 +1340,50 @@ const handleGetSteamGuard = async (orderId) => {
                               </div>
                               
                               {steamCodes[order._id] ? (
-                                <div className="bg-green-500/10 border border-green-500/20 px-6 py-2 rounded-lg text-center animate-pulse">
-                                  <span className="text-xs text-green-500 block mb-1">โค้ดของคุณคือ</span>
-                                  <span className="text-2xl font-black text-green-400 tracking-widest eng-num">{steamCodes[order._id]}</span>
-                                </div>
-                              ) : (
-                                <button 
-  onClick={() => handleGetSteamGuard(order._id)}
-  disabled={guardCooldowns[order._id] > 0 || fetchingCode[order._id]}
-  className={`smooth-btn px-4 py-2.5 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
-    guardCooldowns[order._id] > 0
-      ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed shadow-none'
-      : 'bg-green-500 hover:bg-green-400 text-black shadow-[0_0_10px_rgba(34,197,94,0.3)] disabled:opacity-50'
-  }`}
->
-  {fetchingCode[order._id] ? (
-    'กำลังดึงโค้ด...'
-  ) : guardCooldowns[order._id] > 0 ? (
-    `รอ ${guardCooldowns[order._id]} วิ`
-  ) : (
-    'ขอโค้ด Steam Guard'
-  )}
-</button>
-                              )}
+  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+    <div className="bg-green-500/10 border border-green-500/20 px-6 py-2 rounded-lg text-center animate-pulse">
+      <span className="text-xs text-green-500 block mb-1">โค้ดของคุณคือ</span>
+      <span className="text-2xl font-black text-green-400 tracking-widest eng-num">{steamCodes[order._id]}</span>
+    </div>
+
+    {/* ปุ่มขอโค้ด พร้อมตัวนับเวลา (ย้ายมาอยู่มุมขวาในกรอบเดียวกัน) */}
+    <button 
+      onClick={() => handleGetSteamGuard(order._id)}
+      disabled={guardCooldowns[order._id] > 0 || fetchingCode[order._id]}
+      className={`smooth-btn px-4 py-2.5 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
+        guardCooldowns[order._id] > 0
+          ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed shadow-none'
+          : 'bg-green-500 hover:bg-green-400 text-black shadow-[0_0_10px_rgba(34,197,94,0.3)] disabled:opacity-50'
+      }`}
+    >
+      {fetchingCode[order._id] ? (
+        'กำลังดึงโค้ด...'
+      ) : guardCooldowns[order._id] > 0 ? (
+        `รอ ${guardCooldowns[order._id]} วิ`
+      ) : (
+        'ขอโค้ด Steam Guard'
+      )}
+    </button>
+  </div>
+) : (
+  <button 
+    onClick={() => handleGetSteamGuard(order._id)}
+    disabled={guardCooldowns[order._id] > 0 || fetchingCode[order._id]}
+    className={`smooth-btn px-4 py-2.5 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
+      guardCooldowns[order._id] > 0
+        ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed shadow-none'
+        : 'bg-green-500 hover:bg-green-400 text-black shadow-[0_0_10px_rgba(34,197,94,0.3)] disabled:opacity-50'
+    }`}
+  >
+    {fetchingCode[order._id] ? (
+      'กำลังดึงโค้ด...'
+    ) : guardCooldowns[order._id] > 0 ? (
+      `รอ ${guardCooldowns[order._id]} วิ`
+    ) : (
+      'ขอโค้ด Steam Guard'
+    )}
+  </button>
+)}
                             </div>
                           </div>
                           
