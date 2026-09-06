@@ -471,11 +471,13 @@ const handleGetSteamGuard = async (orderId) => {
           price: product.price 
         }) 
       });
+  
       const data = await res.json();
       if (res.ok) { 
         setUser({ ...user, balance: data.newBalance }); 
         showNotification(`✓ ซื้อ ${product.name} สำเร็จ! ไปที่ประวัติเพื่อรับของ`, 'success'); 
         loadOrders(); 
+        loadProducts(); // 🔥 เพิ่มบรรทัดนี้เข้าไป 1 บรรทัดครับ! เพื่อสั่งให้รีเฟรชสต็อกหน้าร้าน
       } else { 
         showNotification(data.message, 'error'); 
       }
