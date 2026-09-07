@@ -204,6 +204,7 @@ useEffect(() => {
   const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
   const [announcements, setAnnouncements] = useState([]);
   const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); // 🔥 เพิ่ม State สำหรับเก็บคำค้นหา
   
   const STORE_LINKS = {
     discord: "https://discord.gg/TApFSKWtYK",
@@ -1015,6 +1016,27 @@ const handleGetSteamGuard = async (orderId) => {
 
             <h2 className="text-3xl font-black mb-6">ร้านค้า (SHOP)</h2>
             
+            {/* 🔥 ช่องค้นหาสินค้า */}
+            <div className="mb-6 w-full max-w-md">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="🔍 ค้นหาชื่อเกม..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-gray-900/80 border border-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-yellow-500 transition-colors"
+                />
+                {searchTerm && (
+                  <button 
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="flex gap-3 mb-8 overflow-x-auto py-6 px-2 -my-4 -mx-2 scrollbar-hide">
               {categories.map(cat => (
                 <button 
@@ -1032,7 +1054,9 @@ const handleGetSteamGuard = async (orderId) => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product, index) => (
+              {filteredProducts
+                .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) // 🔥 กรองชื่อเกมจากคำค้นหา
+                .map((product, index) => (
                 <div key={product._id} className="smooth-hover glass-panel rounded-2xl p-4 flex flex-col border-white/5 overflow-hidden group" style={{animationDelay: `${index * 0.1}s`}}>
                   {product.image ? (
                     <div className="w-full h-48 mb-4 rounded-xl overflow-hidden relative">
