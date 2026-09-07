@@ -265,6 +265,25 @@ useEffect(() => {
     }
   };
 
+// 🔥 ฟังก์ชันสำหรับกดปักหมุด / ยกเลิกปักหมุดสินค้า
+  const handleTogglePin = async (productId, productName) => {
+    try {
+      const res = await fetch(`${API_URL}/admin/products/${productId}/pin`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(`✓ อัปเดตสถานะปักหมุดของ ${productName} สำเร็จ!`, 'success');
+        loadProducts(); // โหลดรายการสินค้าใหม่เพื่อให้หน้าเว็บอัปเดตทันที
+      } else {
+        showNotification(data.message || 'ปักหมุดไม่สำเร็จ', 'error');
+      }
+    } catch (err) {
+      showNotification('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+    }
+  };
+
   const loadAnnouncements = async () => {
     try {
       const res = await fetch(`${API_URL}/announcements`);
@@ -1085,6 +1104,7 @@ const handleGetSteamGuard = async (orderId) => {
                             {product.badge}
                           </div>
                         )}
+                        
                         {/* 🔥 ป้ายเตือน Denuvo */}
                         {product.denuvo && (
                           <div className="bg-red-600/90 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg animate-pulse flex items-center gap-1 backdrop-blur-sm border border-red-400/50">
@@ -1864,6 +1884,57 @@ const handleGetSteamGuard = async (orderId) => {
                   )}
                 </div>
               </div>
+
+{/* 📌 ส่วนจัดการปักหมุดเกมฮิตในหน้าแอดมิน */}
+            <div className="glass-panel p-8 rounded-3xl border-white/5 mt-8">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">⭐ จัดการเกมฮิตแนะนำ (Pin to Top)</h3>
+              <p className="text-gray-400 text-sm mb-6">กดปุ่มเพื่อเลือกเกมที่ต้องการให้ขึ้นไปแสดงเป็นอันดับแรกสุดพร้อมป้ายแนะนำหน้าร้าน</p>
+              
+              <div className="overflow-x-auto max-h-96 overflow-y-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-white/10 text-gray-400 text-sm">
+                      <th className="pb-3 px-2 font-medium">ชื่อเกม / สินค้า</th>
+                      <th className="pb-3 px-2 font-medium">หมวดหมู่</th>
+                      <th className="pb-3 px-2 font-medium text-center">สถานะปัจจุบัน</th>
+                      <th className="pb-3 px-2 font-medium text-center">จัดการปักหมุด</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.map((p) => (
+                      <tr key={p._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="py-4 px-2 font-bold text-white flex items-center gap-3">
+                          {p.image && <img src={p.image} alt="" className="w-10 h-10 object-cover rounded-lg border border-white/10" />}
+                          <span>{p.name}</span>
+                        </td>
+                        <td className="py-4 px-2 text-gray-400 text-sm">{p.category}</td>
+                        <td className="py-4 px-2 text-center">
+                          {p.isPinned ? (
+                            <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-3 py-1 rounded-full text-xs font-bold">
+                              ⭐ ปักหมุดอยู่
+                            </span>
+                          ) : (
+                            <span className="text-gray-500 text-xs">ปกติ</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-2 text-center">
+                          <button 
+                            onClick={() => handleTogglePin(p._id, p.name)}
+                            className={`smooth-btn px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                              p.isPinned 
+                                ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white' 
+                                : 'bg-yellow-500 text-black hover:bg-yellow-400 shadow-lg'
+                            }`}
+                          >
+                            {p.isPinned ? 'ยกเลิกปักหมุด' : '⭐ ปักหมุดเกมนี้'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
               {/* ตารางรายชื่อผู้ใช้งาน */}
               <div className="overflow-x-auto">
