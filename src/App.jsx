@@ -138,6 +138,9 @@ export default function SOCIETYxSHOP() {
   const [steamCodes, setSteamCodes] = useState({});
   const [fetchingCode, setFetchingCode] = useState({});
   const [guardCooldowns, setGuardCooldowns] = useState({});
+  const [showRentalModal, setShowRentalModal] = useState(null);
+  const [rentalRates, setRentalRates] = useState([]);
+  const [selectedRate, setSelectedRate] = useState(null);
 
 // ⏱️ ระบบนับเวลาถอยหลังปุ่มขอ Steam Guard (ลดลงทีละ 1 วินาที)
 useEffect(() => {
@@ -386,13 +389,36 @@ const handleGetSteamGuard = async (orderId) => {
     setFetchingCode(prev => ({ ...prev, [orderId]: false }));
   };
 
-  const handleBuy = (product) => {
+  const handleBuy = async (product) => {
     if (isGuest) {
       showNotification('⚠ กรุณาเข้าสู่ระบบเพื่อสั่งซื้อสินค้า', 'warning');
       setAuthMode('login');
       setCurrentPage('auth');
       return;
     }
+    
+    // 🔥 ถ้าระบบตรวจเจอว่าเป็น "ไอดีเช่า" ให้ไปดึงราคาเช่าก่อน
+    if (product.badge === 'ไอดีเช่า') {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/products/${product._id}/rental-rates`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setRentalRates(data.rates);
+          setSelectedRate(data.rates[0]); // เลือกเรทแรกสุดให้เป็นค่าเริ่มต้น
+          setShowRentalModal(product);
+        } else {
+          showNotification(data.message || 'ดึงราคาเช่าไม่สำเร็จ', 'error');
+        }
+      } catch (err) {
+        showNotification('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+      }
+      setLoading(false);
+      return;
+    }
+
     if (user.balance < product.price) {
       showNotification('⚠ ยอดเงินไม่พอ กรุณาเติมเงิน', 'warning');
       return;
@@ -528,6 +554,44 @@ const handleGetSteamGuard = async (orderId) => {
         showNotification(data.message, 'error'); 
       }
     } catch (err) {}
+  };
+
+const confirmRentalPurchase = async () => {
+    if (user.balance < selectedRate.price) {
+      showNotification('⚠ ยอดเงินไม่พอ กรุณาเติมเงิน', 'warning');
+      return;
+    }
+    
+    const product = showRentalModal; 
+    setShowRentalModal(null); 
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/orders`, { 
+        method: 'POST', 
+        headers: { 
+          'Authorization': `Bearer ${token}`, 
+          'Content-Type': 'application/json' 
+        }, 
+        body: JSON.stringify({ 
+          productId: product._id, 
+          productName: `${product.name} (เช่า ${selectedRate.days} วัน)`, // บอกแอดมินให้รู้ว่าเช่ากี่วัน
+          price: selectedRate.price,
+          durationDays: selectedRate.days // 🔥 ยิงจำนวนวันไปหลังบ้าน
+        }) 
+      });
+  
+      const data = await res.json();
+      if (res.ok) { 
+        setUser({ ...user, balance: data.newBalance }); 
+        showNotification(`✓ เช่า ${product.name} สำเร็จ! ไปที่ประวัติเพื่อรับของ`, 'success'); 
+        loadOrders(); 
+        loadProducts();
+      } else { 
+        showNotification(data.message, 'error'); 
+      }
+    } catch (err) {}
+    setLoading(false);
   };
 
   const handleAuth = async (e) => {
@@ -2067,6 +2131,43 @@ const handleGetSteamGuard = async (orderId) => {
               </button>
               <button onClick={confirmPurchase} className="smooth-btn flex-1 py-3.5 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.2)]">
                 ยืนยันซื้อสินค้า
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+{/* 🔥 หน้าต่างยืนยันการเช่าไอดี */}
+      {showRentalModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4 fade-in">
+          <div className="glass-panel border border-yellow-500/40 rounded-3xl p-8 max-w-sm w-full shadow-[0_0_40px_rgba(212,175,55,0.15)]">
+            <h3 className="text-2xl font-black mb-2 text-white">เลือกระยะเวลาเช่า</h3>
+            <p className="text-gray-400 text-sm mb-6">เกม: <span className="text-yellow-400 font-bold">{showRentalModal.name}</span></p>
+            
+            <div className="space-y-3 mb-8">
+              {rentalRates.map((rate, idx) => (
+                <label key={idx} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${selectedRate.days === rate.days ? 'bg-yellow-500/20 border-yellow-500' : 'bg-black/40 border-white/10 hover:border-white/30'}`}>
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="radio" 
+                      name="rentalRate" 
+                      checked={selectedRate.days === rate.days}
+                      onChange={() => setSelectedRate(rate)}
+                      className="accent-yellow-500 w-4 h-4"
+                    />
+                    <span className="text-white font-bold">เช่า {rate.days} วัน</span>
+                  </div>
+                  <span className="text-yellow-400 font-black eng-num">฿{rate.price}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setShowRentalModal(null)} className="smooth-btn flex-1 py-3.5 bg-black/40 border border-white/10 text-gray-300 font-bold rounded-xl hover:text-white">
+                ยกเลิก
+              </button>
+              <button onClick={confirmRentalPurchase} disabled={loading} className="smooth-btn flex-1 py-3.5 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.2)] disabled:opacity-50">
+                {loading ? 'กำลังสั่งซื้อ...' : 'ยืนยันสั่งซื้อ'}
               </button>
             </div>
           </div>
