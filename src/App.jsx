@@ -1055,12 +1055,23 @@ const handleGetSteamGuard = async (orderId) => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts
-                .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) // 🔥 กรองชื่อเกมจากคำค้นหา
+                .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0)) // 🔥 ดันเกมที่ปักหมุดขึ้นมาอยู่อันดับแรกสุดเสมอ
                 .map((product, index) => (
-                <div key={product._id} className="smooth-hover glass-panel rounded-2xl p-4 flex flex-col border-white/5 overflow-hidden group" style={{animationDelay: `${index * 0.1}s`}}>
+                <div key={product._id} className={`smooth-hover glass-panel rounded-2xl p-4 flex flex-col border-white/5 overflow-hidden group relative ${product.isPinned ? 'border-yellow-500/50 shadow-[0_0_20px_rgba(212,175,55,0.15)]' : ''}`} style={{animationDelay: `${index * 0.1}s`}}>
+                  
+                  {/* 🔥 ถ้าเกมไหนถูกปักหมุด ให้มีป้ายพิเศษโชว์เด่นๆ */}
+                  {product.isPinned && (
+                    <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-yellow-500 to-amber-600 text-black px-3 py-1 rounded-full text-xs font-black shadow-lg flex items-center gap-1">
+                      ⭐ เกมฮิตแนะนำ
+                    </div>
+                  )}
+
                   {product.image ? (
+                    
                     <div className="w-full h-48 mb-4 rounded-xl overflow-hidden relative">
                       <img 
+                      
                         src={product.image} 
                         alt={product.name} 
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
@@ -1087,7 +1098,7 @@ const handleGetSteamGuard = async (orderId) => {
                       {product.badge && <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 px-3 py-1 rounded-full text-xs font-bold mt-2 mr-2">{product.badge}</span>}
                     </div>
                   )}
-
+                  
                   <div className="flex-1 flex flex-col justify-between px-2">
                     <div>
                       <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
