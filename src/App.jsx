@@ -1307,7 +1307,7 @@ const confirmRentalPurchase = async () => {
                   </li>
                   <li className="flex gap-3">
                     <span className="bg-yellow-500/20 text-yellow-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">3</span>
-                    <p>โหลดเกมและเข้าเกมครั้งแรกให้สำเร็จ (หากติด Denuvo ให้ลองใหม่ในวันถัดไป)</p>
+                    <p>โหลดเกมและเข้าเกมครั้งแรกให้สำเร็จ </p>
                   </li>
                   <li className="flex gap-3">
                     <span className="bg-yellow-500/20 text-yellow-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">4</span>
