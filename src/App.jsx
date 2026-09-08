@@ -1311,7 +1311,7 @@ const confirmRentalPurchase = async () => {
                   </li>
                   <li className="flex gap-3">
                     <span className="bg-yellow-500/20 text-yellow-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">4</span>
-                    <p>เข้าเกมได้แล้ว ให้ปรับ Steam เป็น <b>"Go Offline..."</b> สามารถเล่นต่อได้ยาวๆ แม้หมดเวลาเช่า (จนกว่าจะลบเกมหรือลงวินโดวส์ใหม่)</p>
+                    <p>เข้าเกมได้แล้ว <b>สามารถเล่นแบบออนไลน์ (Online Mode) ได้ตามปกติ</b> ตลอดระยะเวลาที่เช่า</p>
                   </li>
                 </ul>
               </div>
@@ -1319,12 +1319,12 @@ const confirmRentalPurchase = async () => {
 
             <div className="glass-panel p-6 rounded-2xl border-red-500/20 bg-red-500/5 max-w-4xl mx-auto mt-8">
               <h4 className="text-red-400 font-bold mb-2 flex items-center gap-2">
-                <AlertCircle size={18} /> กฎเหล็กข้อห้าม (หากฝ่าฝืนตัดสิทธิ์การรับประกันทันที)
+                <AlertCircle size={18} /> กฎเหล็กข้อห้าม (หากฝ่าฝืนตัดสิทธิ์การใช้งานทันที)
               </h4>
               <p className="text-gray-400 text-sm leading-relaxed">
                 ❌ ห้ามเปลี่ยน รหัสผ่าน / อีเมล / ชื่อโปรไฟล์ ในบัญชี Steam เด็ดขาด<br/>
-                ❌ ห้ามใช้โปรแกรมช่วยเล่น (Hack/Cheat) หรือทำให้ไอดีโดนแบน<br/>
-                ❌ ห้ามเล่นในโหมดออนไลน์ (Online Mode) ให้ปรับเป็นโหมดออฟไลน์ (Offline Mode) เสมอ<br/>
+                ❌ ห้ามใช้โปรแกรมช่วยเล่น (Hack/Cheat) หรือทำให้ไอดีโดนแบน (แบน VAC)<br/>
+                ❌ <b>สำหรับเกม Steam Offline (ซื้อขาด)</b>: ห้ามเล่นโหมดออนไลน์ ให้ปรับเป็นออฟไลน์เสมอ<br/>
                 ❌ ห้ามนำบัญชีไปแจกจ่าย หรือจำหน่ายต่อให้ผู้อื่น
               </p>
             </div>
