@@ -1079,6 +1079,9 @@ const confirmRentalPurchase = async () => {
             <button onClick={() => setCurrentPage('contact')} className={`nav-btn ${currentPage === 'contact' ? 'active' : ''}`}>
               <Phone size={18} className="inline mr-2 mb-1" /> ติดต่อเรา
             </button>
+            <button onClick={() => setCurrentPage('guide')} className={`nav-btn ${currentPage === 'guide' ? 'active' : ''}`}>
+              📖 คู่มือการใช้งาน
+            </button>
             <button onClick={() => setCurrentPage('reviews')} className={`nav-btn ${currentPage === 'reviews' ? 'active' : ''}`}>
               ⭐ รีวิวจากลูกค้า
             </button>
@@ -1240,6 +1243,86 @@ const confirmRentalPurchase = async () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+{currentPage === 'guide' && (
+          <div className="fade-in space-y-8 pb-12">
+            <div className="text-center max-w-2xl mx-auto mb-10">
+              <h2 className="text-3xl md:text-4xl font-black mb-3">คู่มือการใช้งาน <span className="text-yellow-500">(USER GUIDE)</span></h2>
+              <p className="text-gray-400 text-sm md:text-base">ขั้นตอนการเข้าเล่นเกม Steam Offline และ ไอดีเช่า อ่านทำความเข้าใจก่อนเริ่มใช้งาน</p>
+              <div className="w-20 h-1 bg-yellow-500 rounded-full mx-auto mt-4"></div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* คู่มือ Steam Offline */}
+              <div className="glass-panel p-8 rounded-3xl border-white/5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"></div>
+                <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                  <ShoppingBag className="text-blue-400"/> แบบซื้อขาด (Steam Offline)
+                </h3>
+                <ul className="space-y-4 text-gray-300 text-sm">
+                  <li className="flex gap-3">
+                    <span className="bg-blue-500/20 text-blue-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">1</span>
+                    <p>ล็อกอินเข้า Steam ด้วย ไอดี และ รหัสผ่าน ที่ได้รับจากหน้าประวัติการสั่งซื้อ</p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="bg-blue-500/20 text-blue-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">2</span>
+                    <p>ไปที่หน้าคลังเกม (Library) กดดาวน์โหลดและติดตั้งเกมให้เรียบร้อย</p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="bg-blue-500/20 text-blue-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">3</span>
+                    <p>เมื่อเข้าเกมได้แล้ว ให้ออกมาที่หน้าต่าง Steam กดที่เมนู Steam (มุมซ้ายบน) เลือก <b>"Go Offline..."</b> (เข้าสู่โหมดออฟไลน์)</p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="bg-blue-500/20 text-blue-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">4</span>
+                    <p>สามารถเล่นเกมต่อในโหมดออฟไลน์ได้ตลอดชีพ (ห้ามปรับกลับเป็นออนไลน์เด็ดขาด)</p>
+                  </li>
+                </ul>
+              </div>
+
+              {/* คู่มือ ไอดีเช่า & Denuvo */}
+              <div className="glass-panel p-8 rounded-3xl border-yellow-500/20 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl"></div>
+                <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                  <Clock className="text-yellow-400"/> แบบไอดีเช่า & แก้ปัญหา Denuvo
+                </h3>
+                <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl mb-4">
+                  <p className="text-red-400 text-xs font-bold mb-1">⚠️ ระบบ Denuvo คืออะไร?</p>
+                  <p className="text-gray-400 text-[11px] leading-relaxed">เกมที่มี Denuvo จะจำกัดการล็อกอินเครื่องใหม่แค่ 5 เครื่อง/วัน หากคิวเต็มต้องรอ 24 ชม. จึงเป็นเหตุผลว่าทำไมต้องใช้ระบบ "เช่า" เพื่อจองคิวเข้าเกมครั้งแรก</p>
+                </div>
+                <ul className="space-y-4 text-gray-300 text-sm">
+                  <li className="flex gap-3">
+                    <span className="bg-yellow-500/20 text-yellow-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">1</span>
+                    <p>เลือกจำนวนวันเช่าตามต้องการ และนำไอดีไปล็อกอิน Steam</p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="bg-yellow-500/20 text-yellow-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">2</span>
+                    <p>หาก Steam ถามหา Guard ให้กดปุ่ม <b>"ขอโค้ด Steam Guard"</b> ในหน้าประวัติการสั่งซื้อ</p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="bg-yellow-500/20 text-yellow-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">3</span>
+                    <p>โหลดเกมและเข้าเกมครั้งแรกให้สำเร็จ (หากติด Denuvo ให้ลองใหม่ในวันถัดไป)</p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="bg-yellow-500/20 text-yellow-400 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold">4</span>
+                    <p>เข้าเกมได้แล้ว ให้ปรับ Steam เป็น <b>"Go Offline..."</b> สามารถเล่นต่อได้ยาวๆ แม้หมดเวลาเช่า (จนกว่าจะลบเกมหรือลงวินโดวส์ใหม่)</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-2xl border-red-500/20 bg-red-500/5 max-w-4xl mx-auto mt-8">
+              <h4 className="text-red-400 font-bold mb-2 flex items-center gap-2">
+                <AlertCircle size={18} /> กฎเหล็กข้อห้าม (หากฝ่าฝืนตัดสิทธิ์การรับประกันทันที)
+              </h4>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                ❌ ห้ามเปลี่ยน รหัสผ่าน / อีเมล / ชื่อโปรไฟล์ ในบัญชี Steam เด็ดขาด<br/>
+                ❌ ห้ามใช้โปรแกรมช่วยเล่น (Hack/Cheat) หรือทำให้ไอดีโดนแบน<br/>
+                ❌ ห้ามเล่นในโหมดออนไลน์ (Online Mode) ให้ปรับเป็นโหมดออฟไลน์ (Offline Mode) เสมอ<br/>
+                ❌ ห้ามนำบัญชีไปแจกจ่าย หรือจำหน่ายต่อให้ผู้อื่น
+              </p>
             </div>
           </div>
         )}
