@@ -709,12 +709,16 @@ const confirmRentalPurchase = async () => {
     .smooth-btn:active { transform: scale(0.96); }
     .nav-btn { 
       position: relative; 
-      padding: 0.75rem 1.5rem; 
+      padding: 0.75rem 1.25rem;
       border-radius: 1rem; 
       cursor: pointer; 
       transition: all 0.3s ease; 
       color: #9ca3af; 
       font-weight: 500;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center; 
+      justify-content: center;
     }
     .nav-btn.active { 
       color: #d4af37; 
