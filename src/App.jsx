@@ -645,13 +645,29 @@ const confirmRentalPurchase = async () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const filteredProducts = selectedCategory === 'ทั้งหมด' 
-    ? products 
-    : products.filter(p => p.category === selectedCategory);
-  
-  const categories = ['ทั้งหมด', ...new Set(products.map(p => p.category))];
+  // 🔥 จัดกลุ่มหมวดหมู่ใหม่ แยก Steam Offline กับ ไอดีเช่า ออกจากกัน
+  const processedProducts = products.map(p => {
+    let newCategory = p.category;
+    
+    // ถ้าป้ายกำกับคือ 'ไอดีเช่า' ให้แยกปุ่มเป็นหมวด Steam ไอดีเช่า
+    if (p.badge === 'ไอดีเช่า') {
+      newCategory = 'Steam ไอดีเช่า';
+    } 
+    // ถ้าเป็น Steam Game ปกติ ให้เปลี่ยนชื่อปุ่มเป็น Steam Offline
+    else if (p.category === 'Steam Game' || p.category === 'STEAM OFFLINE') {
+      newCategory = 'Steam Offline';
+    }
+    
+    return { ...p, category: newCategory };
+  });
 
-  const filteredAdminUsers = adminUsers.filter(u => 
+  const filteredProducts = selectedCategory === 'ทั้งหมด' 
+    ? processedProducts 
+    : processedProducts.filter(p => p.category === selectedCategory);
+  
+  const categories = ['ทั้งหมด', ...new Set(processedProducts.map(p => p.category))];
+
+  const filteredAdminUsers = adminUsers.filter(u =>
     `${u.username}#${u.tag}`.toLowerCase().includes(userSearch.toLowerCase()) || 
     u.email.toLowerCase().includes(userSearch.toLowerCase())
   );
