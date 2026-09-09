@@ -133,6 +133,75 @@ const ParticlesBackground = () => {
   return <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full z-[-1] pointer-events-none" style={{background: 'linear-gradient(to bottom, #050508, #0a0a0f)'}} />;
 };
 
+// ⏱️ ระบบกล่องนับเวลาถอยหลัง (หลอดเวลาลดลงแบบ Real-time)
+const RentalTimer = ({ startAt, expiresAt }) => {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!startAt || !expiresAt) return null;
+
+  const start = new Date(startAt).getTime();
+  const end = new Date(expiresAt).getTime();
+  const current = now.getTime();
+
+  // กรณีหมดเวลาแล้ว
+  if (current >= end) {
+    return (
+      <div className="mt-4 bg-black/40 p-4 rounded-xl border border-red-500/30 fade-in">
+         <div className="flex justify-between items-center text-xs font-bold text-red-500 mb-2">
+           <span className="flex items-center gap-1"><AlertCircle size={14}/> หมดเวลาเช่าแล้ว</span>
+           <span>0%</span>
+         </div>
+         <div className="w-full bg-gray-900 rounded-full h-2">
+           <div className="bg-red-500 h-2 rounded-full w-0"></div>
+         </div>
+      </div>
+    );
+  }
+
+  // คำนวณเปอร์เซ็นต์ (เปอร์เซ็นต์ที่เหลืออยู่)
+  const totalDuration = end - start;
+  const remaining = end - current;
+  const rawProgress = (remaining / totalDuration) * 100;
+  const progress = Math.min(Math.max(rawProgress, 0), 100);
+
+  // คำนวณวัน ชม. นาที วิ
+  const d = Math.floor(remaining / (1000 * 60 * 60 * 24));
+  const h = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+  const m = Math.floor((remaining / 1000 / 60) % 60);
+  const s = Math.floor((remaining / 1000) % 60);
+
+  let timeString = '';
+  if (d > 0) timeString += `${d} วัน `;
+  timeString += `${h} ชม. ${m} นาที ${s} วิ`;
+
+  // เปลี่ยนสีหลอดตามเวลาที่เหลือ (เหลือน้อยให้แดง)
+  const barColor = progress < 10 ? 'bg-red-500' : progress < 30 ? 'bg-orange-500' : 'bg-green-500';
+
+  return (
+    <div className="mt-4 bg-black/60 p-4 rounded-xl border border-white/5 shadow-inner fade-in">
+      <div className="flex justify-between items-center mb-3">
+        <span className="text-xs font-bold text-gray-400 flex items-center gap-1">
+          <Clock size={14} className="text-yellow-400 animate-pulse"/> เวลาคงเหลือ
+        </span>
+        <span className="text-[13px] font-black text-white eng-num bg-black/50 px-3 py-1.5 rounded-lg border border-white/10 shadow-sm">
+          {timeString}
+        </span>
+      </div>
+      <div className="w-full bg-gray-900 rounded-full h-2 overflow-hidden border border-white/5">
+         <div 
+           className={`${barColor} h-full rounded-full transition-all duration-1000 ease-linear shadow-[0_0_10px_currentColor] opacity-90`} 
+           style={{ width: `${progress}%` }}
+         ></div>
+      </div>
+    </div>
+  );
+};
+
 export default function SOCIETYxSHOP() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [steamCodes, setSteamCodes] = useState({});
@@ -1621,13 +1690,34 @@ const confirmRentalPurchase = async () => {
 )}
                             </div>
                           </div>
+                        
+                          {/* 🔥 แยกคำเตือนระหว่าง "ไอดีเช่า" กับ "ซื้อขาด" (ย้ายมาไว้ข้างในนี้) */}
+                          {order.expiresAt || order.productName.includes('เช่า') ? (
+                            <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-xl mt-4">
+                              <p className="text-yellow-400 text-xs font-bold mb-1 flex items-center gap-1"><AlertCircle size={14}/> กฎสำหรับไอดีเช่า (เล่นออนไลน์ได้)</p>
+                              <p className="text-gray-400 text-[11px] leading-relaxed">
+                                ✓ สามารถเข้าเล่นโหมดออนไลน์ (Online Mode) ร่วมกับผู้อื่นได้ตามปกติ<br/>
+                                ❌ ห้ามเปลี่ยน รหัสผ่าน / อีเมล / ชื่อโปรไฟล์ เด็ดขาด<br/>
+                                ⚠️ กรุณา <b>ออกจากระบบ (Log out) ก่อนเวลาหมด 5 นาที</b> เพื่อป้องกันปัญหาไอดีค้าง
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl mt-4">
+                              <p className="text-red-400 text-xs font-bold mb-1 flex items-center gap-1"><AlertCircle size={14}/> กฎสำหรับเกมซื้อขาด (Steam Offline)</p>
+                              <p className="text-gray-400 text-[11px] leading-relaxed">
+                                ❌ <b>ห้ามเล่นโหมดออนไลน์เด็ดขาด</b> ให้ปรับ Steam เป็น "Go Offline" ทุกครั้งก่อนเข้าเล่น<br/>
+                                ⚠️ กรณีลง Windows ใหม่ กรุณาแจ้งแอดมินและออกจากระบบก่อน มิฉะนั้นจะต้องสั่งซื้อใหม่
+                              </p>
+                            </div>
+                          )}
                           
-                          <p className="text-gray-500 text-xs mt-4">⚠️ สำคัญ: อย่าลืมปรับออฟไลน์ทุกครั้งก่อนเข้าเล่น หากไม่ได้ปรับออฟไลน์จะทำให้หลุดออกจากระบบ และจะต้องสั่งซื้อใหม่
+                          {/* 🔥 เอาหลอดเวลามาวางไว้ตรงนี้เลยครับ! */}
+                          <RentalTimer startAt={order.startAt} expiresAt={order.expiresAt} />
 
-สำคัญ: ลง Windows ใหม่ กรุณาแจ้งแอดมินและออกจากระบบก่อน หากไม่ได้แจ้งและออกจากระบบก่อนจะต้องสั่งซื้อใหม่เท่านั้น</p>
                         </div>
                       )}
-
+                      
+                      {/* ของเดิมที่อยู่ข้างล่าง ปล่อยไว้เหมือนเดิมครับ */}
                       {productType === 'download_only' && (
                         <div className="bg-black/60 p-6 rounded-xl border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-5">
                           <div>
