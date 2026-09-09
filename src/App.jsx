@@ -1220,7 +1220,12 @@ const confirmRentalPurchase = async () => {
                         <span className="text-[10px] text-gray-500 eng-num flex items-center gap-1 uppercase tracking-tighter">
                           <ShoppingBag size={10} /> ขายแล้ว {product.soldCount || 0} ชิ้น
                         </span>
-                        {product.stock === 'unlimited' ? (
+                        {/* 🔥 เช็กว่าเป็นไอดีเช่าให้เปลี่ยนข้อความเตือนให้เช็กคิว */}
+                        {product.badge === 'ไอดีเช่า' ? (
+                          <span className="text-[10px] text-yellow-400 font-bold flex items-center gap-1">
+                             🔍 กดปุ่มสั่งซื้อเพื่อเช็กคิวว่าง
+                          </span>
+                        ) : product.stock === 'unlimited' ? (
                           <span className="text-[10px] text-green-500 font-bold flex items-center gap-1">
                              ✓ สินค้าพร้อมส่ง
                           </span>
@@ -1367,7 +1372,15 @@ const confirmRentalPurchase = async () => {
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
                 <span className="text-yellow-500">⚡</span> เติมเงินอัตโนมัติ (Dynamic QR)
               </h2>
-              
+              {/* 🔥 กล่องเตือนก่อนเติมเงิน */}
+              <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl mb-6 fade-in">
+                <p className="text-red-400 font-bold text-sm flex items-center gap-2 mb-1">
+                  <AlertCircle size={16}/> ประกาศสำคัญก่อนเติมเงิน
+                </p>
+                <p className="text-gray-400 text-[11px] md:text-xs">
+                  สำหรับลูกค้าที่ต้องการซื้อ <b className="text-yellow-400">"ไอดีเช่า"</b> กรุณากลับไปหน้าร้านและ <b>"กดปุ่มสั่งซื้อเพื่อเช็กคิวว่าง"</b> ก่อนทำการเติมเงินทุกครั้ง (สามารถกดเช็กคิวได้แม้ยอดเงินเป็น 0)<br/>ทางร้านขอสงวนสิทธิ์ <u>ไม่รับโอนเงินคืนทุกกรณี</u> หากลูกค้าเติมเงินเข้ามาแล้วคิวเช่าเต็ม
+                </p>
+              </div>
               {!qrImage ? (
                 <div className="space-y-4 fade-in">
                   <div>
